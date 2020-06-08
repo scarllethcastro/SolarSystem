@@ -62,7 +62,7 @@ struct scene_model : scene_base
 
 
 
-    void set_gui();
+    void set_gui(vcl::timer_basic& timer);
 
     // visual representation of a surface
     gui_scene_structure gui_scene;

@@ -58,7 +58,8 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     // Earth
     earth = create_planet(e_radius, e_mass, e_p, e_v, e_inclination, e_force, e_orbitradius);
     earth.drawable = mesh_primitive_sphere(1.0f, {0,0,0}, 20, 40);
-    earth.drawable.uniform.color = {0.0f, 0.0f, 1.0f};
+    //earth.drawable.uniform.color = {0.0f, 0.0f, 1.0f};
+    earth.drawable.uniform.shading = {1,0,0};
 
     // Textures
     // Universe
@@ -67,7 +68,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     // Sun
 
     // Earth
-
+    texture_earth_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/terra3.png"));
 }
 
 
@@ -76,8 +77,15 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     It is used to compute time-varying argument and perform data data drawing */
 void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure&)
 {
-    const float dt = timer.update();
-    set_gui();
+ //   const float dt = timer.update();
+    timer.update();
+//    std::cout << "dt = " << dt << std::endl;
+    set_gui(timer);
+
+    // Simulation time step (dt)
+    float dt = timer.scale*0.01f;
+    std::cout << "dt = " << dt << std::endl;
+
     glEnable( GL_POLYGON_OFFSET_FILL ); // avoids z-fighting when displaying wireframe
 
     // *** Earth data update *** //
@@ -90,7 +98,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     v = v + dt* F/earth.mass;
     p = p + dt*v;
 
-    std::cout << "force = " << earth.force << std::endl;
+//    std::cout << "force = " << earth.force << std::endl;
     earth.drawable.uniform.transform.translation = p;
     earth.force = 2000000* G * sun.mass * earth.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
 
@@ -109,8 +117,13 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     // Sun
     draw(sun.drawable, scene.camera, shaders["mesh"]);
+
     // Earth
+    glBindTexture(GL_TEXTURE_2D, texture_earth_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     draw(earth.drawable, scene.camera, shaders["mesh"]);
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
 //    earth.force = 2000000* G * sun.mass * earth.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
 
@@ -122,8 +135,6 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     }
     // ************************* //
 }
-
-
 
 
 
@@ -430,7 +441,7 @@ mesh create_universe(float dimension){
     return sky;
 }
 
- void scene_model::set_gui()
+ void scene_model::set_gui(timer_basic& timer)
  {
 //     ImGui::SliderFloat("Time", &timer.t, timer.t_min, timer.t_max);
 //     ImGui::SliderFloat("Time scale", &timer.scale, 0.1f, 3.0f);
