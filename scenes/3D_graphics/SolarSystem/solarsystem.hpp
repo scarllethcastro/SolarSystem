@@ -2,6 +2,7 @@
 
 #include "main/scene_base/base.hpp"
 
+
 #ifdef SCENE_SOLAR_SYSTEM
 
 // Store a vec3 (p) + time (t)

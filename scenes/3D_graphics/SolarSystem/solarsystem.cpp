@@ -1,6 +1,8 @@
 
 #include "solarsystem.hpp"
 
+#include "data.hpp"
+
 #include <cmath>
 
 #ifdef SCENE_SOLAR_SYSTEM
@@ -35,15 +37,15 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     scene.camera.apply_rotation(0,0,0,1.2f);
 
     // Data
-    float e_radius = 0.00064;
-    float e_mass = 0.005972;
-    vec3 e_p = {14.71, 0, 0,};
-    vec3 e_v = {0, 7.9704,0};
-    float e_inclination = 0;
-    float e_orbitradius = 14.96;
-    float sun_radius = 0.069634;
-    float sun_mass = 1989;
-    vec3 e_force = 200000*G * sun_mass * e_mass/norm(e_p) * -1.0f *normalize(e_p);
+//    float e_radius = 0.00064;
+//    float e_mass = 0.005972;
+//    vec3 e_p = {14.71, 0, 0,};
+//    vec3 e_v = {0, 7.9704,0};
+//    float e_inclination = 0;
+//    float e_orbitradius = 14.96;
+//    float sun_radius = 0.069634;
+//    float sun_mass = 1989;
+    vec3 e_force = 2000000*G * sun_mass * e_mass/(norm(e_p)*norm(e_p)) * -1.0f *normalize(e_p);
 
     // Universe creation
     universe = create_universe(50.0f);
@@ -84,7 +86,6 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     // Simulation time step (dt)
     float dt = timer.scale*0.01f;
-    std::cout << "dt = " << dt << std::endl;
 
     glEnable( GL_POLYGON_OFFSET_FILL ); // avoids z-fighting when displaying wireframe
 
@@ -98,7 +99,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     v = v + dt* F/earth.mass;
     p = p + dt*v;
 
-//    std::cout << "force = " << earth.force << std::endl;
+    std::cout << "force = " << earth.force << std::endl;
     earth.drawable.uniform.transform.translation = p;
     earth.force = 2000000* G * sun.mass * earth.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
 
