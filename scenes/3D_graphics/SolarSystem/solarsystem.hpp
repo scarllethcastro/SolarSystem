@@ -82,11 +82,24 @@ struct scene_model : scene_base
 
     vcl::timer_event timer;    // Timer allowing to indicate periodic events
 
+    // Gravitational constant
     const float G = 0.00000017299008f;
-    planet earth;
-    star sun;
-    vcl::mesh_drawable test;
 
+    // Stars
+    star sun;
+    planet earth;
+
+    // Universe
+    vcl::mesh_drawable universe;
+
+    // Textures
+    GLuint texture_sun_id;
+
+    GLuint texture_earth_id;
+
+    GLuint texture_universe_id;
+
+    // For debug, draw the trajectory that the planet should follow
     std::vector<vcl::vec3> trajectory;
 };
 

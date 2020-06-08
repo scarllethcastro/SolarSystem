@@ -20,6 +20,7 @@ mesh mesh_primitive_ellipsoid(float a, float b, float c, const vec3 &p0, size_t 
 star& create_star(float radius, float mass, vcl::vec3 p, vcl::vec3 v);
 planet& create_planet(float radius, float mass, vcl::vec3 p, vcl::vec3 v,  float inclination, vcl::vec3 force, float orbit_radius);
 std::vector<vcl::vec3> trajectory (float a, float b);
+mesh create_universe(float dimension);
 
 
 /** This function is called before the beginning of the animation loop
@@ -32,6 +33,8 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     scene.camera.camera_type = camera_control_spherical_coordinates;
     scene.camera.scale = 10.0f;
     scene.camera.apply_rotation(0,0,0,1.2f);
+
+    // Data
     float e_radius = 0.00064;
     float e_mass = 0.005972;
     vec3 e_p = {14.71, 0, 0,};
@@ -40,20 +43,30 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     float e_orbitradius = 14.96;
     float sun_radius = 0.069634;
     float sun_mass = 1989;
-    vec3 e_force = G * sun_mass * e_mass/norm(e_p) * -1.0f *normalize(e_p);
+    vec3 e_force = 200000*G * sun_mass * e_mass/norm(e_p) * -1.0f *normalize(e_p);
 
+    // Universe creation
+    universe = create_universe(50.0f);
+    universe.uniform.shading = {1,0,0};
+
+    // Stars creation
+    // Sun
+    sun = create_star(sun_radius, sun_mass, {0,0,0} , {0,0,0});
+    sun.drawable = mesh_primitive_sphere(2.0f, {0,0,0}, 20, 40);
+    sun.drawable.uniform.color = {1.0f, 1.0f, 0.0f};
+
+    // Earth
     earth = create_planet(e_radius, e_mass, e_p, e_v, e_inclination, e_force, e_orbitradius);
     earth.drawable = mesh_primitive_sphere(1.0f, {0,0,0}, 20, 40);
     earth.drawable.uniform.color = {0.0f, 0.0f, 1.0f};
 
-    sun = create_star(sun_radius, sun_mass, {0,0,0} , {0,0,0});
-    sun.drawable = mesh_primitive_sphere(2.0f, {0,0,0}, 20, 40);
-    sun.drawable.uniform.color = {1.0f, 1.0f, 0.0f};
-  //  test = mesh_primitive_sphere(2.0f, {0,0,0}, 20, 40);
-    test = mesh_primitive_disc(2.0f,{0,0,0},{0,0,1},20);
-    test.uniform.color = {1.0f, 1.0f, 0.0f};
+    // Textures
+    // Universe
+    texture_universe_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/universe4.png"));
 
-    //trajectory = std
+    // Sun
+
+    // Earth
 
 }
 
@@ -67,7 +80,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     set_gui();
     glEnable( GL_POLYGON_OFFSET_FILL ); // avoids z-fighting when displaying wireframe
 
-
+    // *** Earth data update *** //
     vec3& p = earth.p;
     vec3& v = earth.v;
 
@@ -77,20 +90,37 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     v = v + dt* F/earth.mass;
     p = p + dt*v;
 
+    std::cout << "force = " << earth.force << std::endl;
     earth.drawable.uniform.transform.translation = p;
-
-    draw(earth.drawable, scene.camera, shaders["wireframe"]);
-    draw(sun.drawable, scene.camera, shaders["wireframe"]);
-    draw(test, scene.camera);
-
     earth.force = 2000000* G * sun.mass * earth.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
+
+    // ************************* //
+
+    // *** Draw the elements *** //
+    // Universe
+    // Before displaying a textured surface: bind the associated texture id
+    glBindTexture(GL_TEXTURE_2D, texture_universe_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    draw(universe, scene.camera, shaders["mesh"]);
+    // After the surface is displayed it is safe to set the texture id to a white image
+    // Avoids to use the previous texture for another object
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+
+    // Sun
+    draw(sun.drawable, scene.camera, shaders["mesh"]);
+    // Earth
+    draw(earth.drawable, scene.camera, shaders["mesh"]);
+
+//    earth.force = 2000000* G * sun.mass * earth.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
 
     if( gui_scene.wireframe ){ // wireframe if asked from the GUI
         glPolygonOffset( 1.0, 1.0 );
-        draw(earth.drawable, scene.camera, shaders["wireframe"]);
+        draw(universe, scene.camera, shaders["wireframe"]);
         draw(sun.drawable,scene.camera, shaders["wireframe"]);
-        draw(test, scene.camera, shaders["wireframe"]);
+        draw(earth.drawable, scene.camera, shaders["wireframe"]);
     }
+    // ************************* //
 }
 
 
@@ -354,6 +384,50 @@ planet& create_planet(float radius, float mass, vec3 p, vec3 v,  float inclinati
 
     return new_planet;
 
+}
+
+mesh create_universe(float dimension){
+    mesh sky;
+    // Geometry
+    float l = dimension/2.0f;
+    mesh base;
+    mesh face1;
+    mesh face2;
+    mesh face3;
+    mesh face4;
+    mesh top;
+
+    base.position = {{-l,-l,-l}, {l,-l,-l}, {l,l,-l}, {-l,l,-l}};
+    base.texture_uv = {{1/4.0f, 2/3.0f}, {2/4.0f, 2/3.0f}, {2/4.0f, 1.0f}, {1/4.0f, 1.0f}};
+    base.connectivity = {{0,1,2}, {0,2,3}};
+
+    face1.position = {{-l,-l,-l}, {l,-l,-l}, {-l,-l,l}, {l,-l,l}};
+    face1.texture_uv = {{1/4.0f, 2/3.0f}, {2/4.0f, 2/3.0f}, {1/4.0f, 1/3.0f}, {2/4.0f, 1/3.0f}};
+    face1.connectivity = {{0,1,2}, {1,2,3}};
+
+    face2.position = {{l,-l,-l}, {l,l,-l}, {l,-l,l}, {l,l,l}};
+    face2.texture_uv = {{2/4.0f, 2/3.0f}, {3/4.0f, 2/3.0f}, {2/4.0f, 1/3.0f}, {3/4.0f, 1/3.0f}};
+    face2.connectivity = {{0,1,2}, {1,2,3}};
+
+    face3.position = {{l,l,-l}, {-l,l,-l}, {l,l,l}, {-l,l,l}};
+    face3.texture_uv = {{3/4.0f, 2/3.0f}, {1.0f, 2/3.0f}, {3/4.0f, 1/3.0f}, {1.0f, 1/3.0f}};
+    face3.connectivity = {{0,1,2}, {1,2,3}};
+
+    face4.position = {{-l,l,-l}, {-l,-l,-l}, {-l,-l,l}, {-l,l,l}};
+    face4.texture_uv = {{0, 2/3.0f}, {1/4.0f, 2/3.0f}, {1/4.0f, 1/3.0f}, {0, 1/3.0f}};
+    face4.connectivity = {{0,1,2}, {0,2,3}};
+
+    top.position = {{-l,-l,l}, {l,-l,l}, {l,l,l}, {-l,l,l}};
+    top.texture_uv = {{1/4.0f, 1/3.0f}, {2/4.0f, 1/3.0f}, {2/4.0f, 0}, {1/4.0f, 0}};
+    top.connectivity = {{0,1,2}, {0,2,3}};
+
+    sky.push_back(base);
+    sky.push_back(face1);
+    sky.push_back(face2);
+    sky.push_back(face3);
+    sky.push_back(face4);
+    sky.push_back(top);
+    return sky;
 }
 
  void scene_model::set_gui()

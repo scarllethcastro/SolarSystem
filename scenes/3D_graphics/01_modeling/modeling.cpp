@@ -104,6 +104,9 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Sky
     texture_sky_id = create_texture_gpu( image_load_png("scenes/3D_graphics/02_texture/assets/universe4.png"));
+
+    test = mesh_primitive_disc(2.0f,{0,0,0},{0,0,1},20);
+    test.uniform.color = {1.0f, 1.0f, 0.0f};
 }
 
 
@@ -269,6 +272,8 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
 //    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 //    glDepthMask(true);
+
+    draw(test, scene.camera, shaders["mesh"]);
 
 }
 

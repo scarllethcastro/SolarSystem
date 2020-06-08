@@ -72,6 +72,8 @@ struct scene_model : scene_base
     GLuint texture_sky_id;
 
     gui_scene_structure gui_scene;
+
+     vcl::mesh_drawable test;
 };
 
 #endif
