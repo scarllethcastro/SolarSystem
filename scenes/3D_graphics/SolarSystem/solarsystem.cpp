@@ -55,7 +55,8 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     // Sun
     sun = create_star(sun_radius, sun_mass, {0,0,0} , {0,0,0});
     sun.drawable = mesh_primitive_sphere(2.0f, {0,0,0}, 20, 40);
-    sun.drawable.uniform.color = {1.0f, 1.0f, 0.0f};
+    //sun.drawable.uniform.color = {1.0f, 1.0f, 0.0f};
+    sun.drawable.uniform.shading = {1,0,0};
 
     // Earth
     earth = create_planet(e_radius, e_mass, e_p, e_v, e_inclination, e_force, e_orbitradius);
@@ -65,12 +66,13 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Textures
     // Universe
-    texture_universe_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/universe4.png"));
+    texture_universe_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/8k_stars.png"));
 
     // Sun
+    texture_sun_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/8k_sun2.png"));
 
     // Earth
-    texture_earth_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/terra3.png"));
+    texture_earth_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/8k_earth1.png"));
 }
 
 
@@ -117,7 +119,11 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
     // Sun
+    glBindTexture(GL_TEXTURE_2D, texture_sun_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     draw(sun.drawable, scene.camera, shaders["mesh"]);
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
     // Earth
     glBindTexture(GL_TEXTURE_2D, texture_earth_id);
