@@ -86,19 +86,19 @@ struct scene_model : scene_base
     // Gravitational constant
     const float G = 0.00000017299008f;
 
-    // Stars
-    star sun;
-    planet earth;
-
     // Universe
     vcl::mesh_drawable universe;
 
+    // Stars
+    star sun;
+    planet mercury;
+    planet earth;
+
     // Textures
-    GLuint texture_sun_id;
-
-    GLuint texture_earth_id;
-
     GLuint texture_universe_id;
+    GLuint texture_sun_id;
+    GLuint texture_mercury_id;
+    GLuint texture_earth_id;
 
     // For debug, draw the trajectory that the planet should follow
     std::vector<vcl::vec3> trajectory;
