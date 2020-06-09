@@ -86,10 +86,13 @@ struct scene_model : scene_base
     // Universe
     vcl::mesh_drawable universe;
 
-    // Stars
+    // Sun
     star sun;
-    planet mercury;
-    planet earth;
+
+    // Planets
+    std::vector<planet> planets;
+//    planet mercury;
+//    planet earth;
 
     // Textures
     GLuint texture_universe_id;

@@ -58,22 +58,26 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     // Sun
     sun = create_star(sun_radius, sun_mass, {0,0,0} , {0,0,0});
     sun.drawable = mesh_primitive_sphere(sun_radius*100, {0,0,0}, 20, 40);
-    //sun.drawable.uniform.color = {1.0f, 1.0f, 0.0f};
     sun.drawable.uniform.shading = {1,0,0};
-//    sun.drawable.uniform.shading.specular = 0.0f;
 
     // Mercury
-    mercury = create_planet(0.0004f, 0.0059, {4.0f,0,0}, {0,0,0}, 0, {0,0,0}, 4.0f);
-    mercury.drawable = mesh_primitive_sphere(0.8f, {0,0,0}, 20, 40);
-    earth.drawable.uniform.shading.specular = 0.0f;
+    // Using the list
+    planet mercury;
+//    mercury = create_planet(0.0004f, 0.0059, {4.0f,0,0}, {0,0,0}, 0, {0,0,0}, 4.0f);
+    mercury.drawable = mesh_primitive_sphere(0.5f, {0,0,0}, 20, 40);
+    mercury.drawable.uniform.shading.specular = 0.0f;
+    mercury.drawable.uniform.transform.translation = {10.0f,0,0};
+    mercury.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/mercury/8k_mercury.png"));
+    planets.push_back(mercury);
 
     // Earth
+    planet earth;
     earth = create_planet(e_radius, e_mass, e_p, e_v, e_inclination, e_force, e_orbitradius);
     earth.drawable = mesh_primitive_sphere(e_radius*1000, {0,0,0}, 20, 40);
     earth.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, e_inclination);
-    //earth.drawable.uniform.color = {0.0f, 0.0f, 1.0f};
-    //earth.drawable.uniform.shading = {1,0,0};
     earth.drawable.uniform.shading.specular = 0.0f;
+    earth.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/earth/8k_earth1.png"));
+    planets.push_back(earth);
 
     // Textures
     // Universe
@@ -81,9 +85,6 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Sun
     texture_sun_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/sun/8k_sun2.png"));
-
-    // Earth
-    texture_earth_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/earth/8k_earth1.png"));
 }
 
 
@@ -102,24 +103,24 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     glEnable( GL_POLYGON_OFFSET_FILL ); // avoids z-fighting when displaying wireframe
 
-    // *** Earth data update *** //
-    vec3& p = earth.p;
-    vec3& v = earth.v;
 
-    vec3 F = earth.force;
+    // *** Earth data update *** //
+    // Using the list
+    vec3& p = planets[1].p;
+    vec3& v = planets[1].v;
+
+    vec3 F = planets[1].force;
 
     // Numerical integration
-    v = v + dt* F/earth.mass;
+    v = v + dt* F/planets[1].mass;
     p = p + dt*v;
 
-
-//    std::cout << "force = " << earth.force << std::endl;
-    earth.drawable.uniform.transform.translation = p;
-    earth.force = G * sun.mass * earth.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
-
+    planets[1].drawable.uniform.transform.translation = p;
+    planets[1].force = G * sun.mass * planets[1].mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
     // ************************* //
 
     // *** Draw the elements *** //
+
     // Universe
     // Before displaying a textured surface: bind the associated texture id
     glBindTexture(GL_TEXTURE_2D, texture_universe_id);
@@ -137,20 +138,25 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     draw(sun.drawable, scene.camera, shaders["mesh"]);
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
-    // Earth
-    glBindTexture(GL_TEXTURE_2D, texture_earth_id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    draw(earth.drawable, scene.camera, shaders["mesh"]);
-    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
-
-//    earth.force = 2000000* G * sun.mass * earth.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
+    // Planets
+    for(planet& it : planets){
+        glBindTexture(GL_TEXTURE_2D, it.drawable.texture_id);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+        draw(it.drawable, scene.camera, shaders["mesh"]);
+        glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+    }
 
     if( gui_scene.wireframe ){ // wireframe if asked from the GUI
         glPolygonOffset( 1.0, 1.0 );
+        // Universe
         draw(universe, scene.camera, shaders["wireframe"]);
+        // Sun
         draw(sun.drawable,scene.camera, shaders["wireframe"]);
-        draw(earth.drawable, scene.camera, shaders["wireframe"]);
+        // Planets
+        for(planet& it : planets){
+            draw(it.drawable, scene.camera, shaders["wireframe"]);
+        }
     }
     // ************************* //
 }
