@@ -41,7 +41,7 @@ vcl::vec3 v_p = {v_rp, 0, v_orbitinclination*v_rp};
 float v_vp = sqrt(vel_aux * (1/v_rp - 1/(2*v_orbitradius)));
 vcl::vec3 v_v = {0, v_vp, 0};
 
-// EARTH
+//EARTH
 float e_radius = 6400 *km;
 float e_mass = 5.972 * 1e+24 * kg;//0.005972;
 float e_inclination = -23.4f * 3.14f/180.0f;
@@ -71,7 +71,7 @@ vcl::vec3 j_p = {j_rp, 0, j_orbitinclination * j_rp};
 float j_vp = sqrt(vel_aux * (1/j_rp - 1/(2*j_orbitradius)));
 vcl::vec3 j_v ={0 , j_vp, 0};
 
-//SATURNO
+//SATURN
 float s_radius = 60268 * km;
 float s_mass = 5.6846 * 1.0e+26;
 float s_inclination = 5.51 *3.14/180;
@@ -93,7 +93,7 @@ vcl::vec3 u_p = {u_rp, 0, u_orbitinclination*u_rp};
 float u_vp = sqrt(vel_aux * (1/u_rp - 1/(2*u_orbitradius)));
 vcl::vec3 u_v = {0,u_vp, 0};
 
-//NETUNO
+//NEPTUNE
 float n_radius = 24.746 * km;
 float n_mass = 1.024 * 1.0e+26;
 float n_inclination = 28.31 * 3.14/180;

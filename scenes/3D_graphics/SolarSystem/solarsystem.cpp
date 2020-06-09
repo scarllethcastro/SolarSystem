@@ -1,4 +1,5 @@
 
+
 #include "solarsystem.hpp"
 
 #include "data.hpp"
@@ -38,7 +39,6 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     scene.camera.apply_rotation(0,0,0,1.2f);
 
 
-
     // Data
 //    float e_radius = 0.00064;
 //    float e_mass = 0.005972;
@@ -60,6 +60,12 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     sun.drawable = mesh_primitive_sphere(sun_radius*100, {0,0,0}, 20, 40);
     //sun.drawable.uniform.color = {1.0f, 1.0f, 0.0f};
     sun.drawable.uniform.shading = {1,0,0};
+//    sun.drawable.uniform.shading.specular = 0.0f;
+
+    // Mercury
+    mercury = create_planet(0.0004f, 0.0059, {4.0f,0,0}, {0,0,0}, 0, {0,0,0}, 4.0f);
+    mercury.drawable = mesh_primitive_sphere(0.8f, {0,0,0}, 20, 40);
+    earth.drawable.uniform.shading.specular = 0.0f;
 
     // Earth
     earth = create_planet(e_radius, e_mass, e_p, e_v, e_inclination, e_force, e_orbitradius);
@@ -71,13 +77,13 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Textures
     // Universe
-    texture_universe_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/8k_stars_milky.png"));
+    texture_universe_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/universe/8k_stars_milky.png"));
 
     // Sun
-    texture_sun_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/8k_sun2.png"));
+    texture_sun_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/sun/8k_sun2.png"));
 
     // Earth
-    texture_earth_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/8k_earth1.png"));
+    texture_earth_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/earth/8k_earth1.png"));
 }
 
 
@@ -106,7 +112,8 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     v = v + dt* F/earth.mass;
     p = p + dt*v;
 
-    //std::cout << "force = " << earth.force << std::endl;
+
+//    std::cout << "force = " << earth.force << std::endl;
     earth.drawable.uniform.transform.translation = p;
     earth.force = G * sun.mass * earth.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
 
