@@ -76,7 +76,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     earth.drawable = mesh_primitive_sphere(e_radius*1000, {0,0,0}, 20, 40);
     earth.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, e_inclination);
     earth.drawable.uniform.shading.specular = 0.0f;
-    earth.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/earth/8k_earth1.png"));
+    earth.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/earth/8k_earth.png"));
     planets.push_back(earth);
 
     // Textures
@@ -84,7 +84,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     texture_universe_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/universe/8k_stars_milky.png"));
 
     // Sun
-    texture_sun_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/sun/8k_sun2.png"));
+    texture_sun_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/sun/8k_sun.png"));
 }
 
 
