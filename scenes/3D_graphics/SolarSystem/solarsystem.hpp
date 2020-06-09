@@ -83,9 +83,6 @@ struct scene_model : scene_base
 
     vcl::timer_event timer;    // Timer allowing to indicate periodic events
 
-    // Gravitational constant
-    const float G = 0.00000017299008f;
-
     // Universe
     vcl::mesh_drawable universe;
 
