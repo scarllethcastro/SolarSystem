@@ -29,6 +29,7 @@ mesh create_universe(float dimension);
     It is used to initialize all part-specific data */
 void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& scene, gui_structure& gui )
 {
+    std::cout << "G = " << G << std::endl;
     // Create visual terrain surface
 
     // Setup initial camera mode and position
@@ -47,22 +48,23 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 //    float e_orbitradius = 14.96;
 //    float sun_radius = 0.069634;
 //    float sun_mass = 1989;
-    vec3 e_force = 2000000*G * sun_mass * e_mass/(norm(e_p)*norm(e_p)) * -1.0f *normalize(e_p);
+    vec3 e_force = G * sun_mass * e_mass/(norm(e_p)*norm(e_p)) * -1.0f *normalize(e_p);
 
     // Universe creation
-    universe = create_universe(50.0f);
+    universe = create_universe(500.0f);
     universe.uniform.shading = {1,0,0};
 
     // Stars creation
     // Sun
     sun = create_star(sun_radius, sun_mass, {0,0,0} , {0,0,0});
-    sun.drawable = mesh_primitive_sphere(2.0f, {0,0,0}, 20, 40);
+    sun.drawable = mesh_primitive_sphere(sun_radius*100, {0,0,0}, 20, 40);
     //sun.drawable.uniform.color = {1.0f, 1.0f, 0.0f};
     sun.drawable.uniform.shading = {1,0,0};
 
     // Earth
     earth = create_planet(e_radius, e_mass, e_p, e_v, e_inclination, e_force, e_orbitradius);
-    earth.drawable = mesh_primitive_sphere(1.0f, {0,0,0}, 20, 40);
+    earth.drawable = mesh_primitive_sphere(e_radius*1000, {0,0,0}, 20, 40);
+    earth.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, e_inclination);
     //earth.drawable.uniform.color = {0.0f, 0.0f, 1.0f};
     //earth.drawable.uniform.shading = {1,0,0};
     earth.drawable.uniform.shading.specular = 0.0f;
@@ -104,9 +106,9 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     v = v + dt* F/earth.mass;
     p = p + dt*v;
 
-    std::cout << "force = " << earth.force << std::endl;
+    //std::cout << "force = " << earth.force << std::endl;
     earth.drawable.uniform.transform.translation = p;
-    earth.force = 2000000* G * sun.mass * earth.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
+    earth.force = G * sun.mass * earth.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
 
     // ************************* //
 
@@ -402,6 +404,7 @@ planet& create_planet(float radius, float mass, vec3 p, vec3 v,  float inclinati
     new_planet.inclination = inclination;
     new_planet.force = force;
     new_planet.orbit_radius = orbit_radius;
+    //new_planet.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, inclination);
 
     return new_planet;
 

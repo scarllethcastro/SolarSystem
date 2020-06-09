@@ -12,7 +12,7 @@ const float kginv = 1.0e+27;
 
 
 // Gravitational constant
-const float G = 6.674 * (1.0e-11) * (m*m*m) * kginv *sinv *sinv;//0.00000017299008f;
+const float G = 6.674 * (1.0e-11) * (m*m*m) * kginv *sinv *sinv;
 
 // SUN
 float sun_radius = 696340 * km;//0.069634;
