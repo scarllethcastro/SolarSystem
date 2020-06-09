@@ -36,6 +36,8 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     scene.camera.scale = 10.0f;
     scene.camera.apply_rotation(0,0,0,1.2f);
 
+
+
     // Data
 //    float e_radius = 0.00064;
 //    float e_mass = 0.005972;
@@ -62,11 +64,12 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     earth = create_planet(e_radius, e_mass, e_p, e_v, e_inclination, e_force, e_orbitradius);
     earth.drawable = mesh_primitive_sphere(1.0f, {0,0,0}, 20, 40);
     //earth.drawable.uniform.color = {0.0f, 0.0f, 1.0f};
-    earth.drawable.uniform.shading = {1,0,0};
+    //earth.drawable.uniform.shading = {1,0,0};
+    earth.drawable.uniform.shading.specular = 0.0f;
 
     // Textures
     // Universe
-    texture_universe_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/8k_stars.png"));
+    texture_universe_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/8k_stars_milky.png"));
 
     // Sun
     texture_sun_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/8k_sun2.png"));
