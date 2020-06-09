@@ -38,16 +38,6 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     scene.camera.scale = 10.0f;
     scene.camera.apply_rotation(0,0,0,1.2f);
 
-
-    // Data
-//    float e_radius = 0.00064;
-//    float e_mass = 0.005972;
-//    vec3 e_p = {14.71, 0, 0,};
-//    vec3 e_v = {0, 7.9704,0};
-//    float e_inclination = 0;
-//    float e_orbitradius = 14.96;
-//    float sun_radius = 0.069634;
-//    float sun_mass = 1989;
     vec3 e_force = G * sun_mass * e_mass/(norm(e_p)*norm(e_p)) * -1.0f *normalize(e_p);
 
     // Universe creation
@@ -61,14 +51,23 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     sun.drawable.uniform.shading = {1,0,0};
 
     // Mercury
-    // Using the list
     planet mercury;
-//    mercury = create_planet(0.0004f, 0.0059, {4.0f,0,0}, {0,0,0}, 0, {0,0,0}, 4.0f);
-    mercury.drawable = mesh_primitive_sphere(0.5f, {0,0,0}, 20, 40);
+    mercury = create_planet(m_radius, m_mass, m_p, m_v, m_inclination, m_force, m_orbitradius);
+    mercury.drawable = mesh_primitive_sphere(m_radius*1000, {0,0,0}, 20, 40);
+    mercury.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, m_inclination);
     mercury.drawable.uniform.shading.specular = 0.0f;
-    mercury.drawable.uniform.transform.translation = {10.0f,0,0};
+//    mercury.drawable.uniform.transform.translation = {10.0f,0,0};
     mercury.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/mercury/8k_mercury.png"));
     planets.push_back(mercury);
+
+    // Venus
+    planet venus;
+    venus = create_planet(v_radius, v_mass,v_p, v_v, v_inclination, v_force, v_orbitradius);
+    venus.drawable = mesh_primitive_sphere(v_radius*1000, {0,0,0}, 20, 40);
+    venus.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, v_inclination);
+    venus.drawable.uniform.shading.specular = 0.0f;
+    venus.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/venus/4k_venus.png"));
+    planets.push_back(venus);
 
     // Earth
     planet earth;
@@ -78,6 +77,51 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     earth.drawable.uniform.shading.specular = 0.0f;
     earth.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/earth/8k_earth.png"));
     planets.push_back(earth);
+
+    // Mars
+    planet mars;
+    mars = create_planet(ma_radius, ma_mass, ma_p, ma_v, ma_inclination, ma_force, ma_orbitradius);
+    mars.drawable = mesh_primitive_sphere(ma_radius*1000, {0,0,0}, 20, 40);
+    mars.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, ma_inclination);
+    mars.drawable.uniform.shading.specular = 0.0f;
+    mars.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/mars/8k_mars.png"));
+    planets.push_back(mars);
+
+    // Jupiter
+    planet jupiter;
+    jupiter = create_planet(j_radius, j_mass, j_p, j_v, j_inclination, j_force, j_orbitradius);
+    jupiter.drawable = mesh_primitive_sphere(j_radius*500, {0,0,0}, 20, 40);
+    jupiter.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, j_inclination);
+    jupiter.drawable.uniform.shading.specular = 0.0f;
+    jupiter.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/jupiter/8k_jupiter.png"));
+    planets.push_back(jupiter);
+
+    // Saturn
+    planet saturn;
+    saturn = create_planet(s_radius, s_mass, s_p, s_v, s_inclination, s_force, s_orbitradius);
+    saturn.drawable = mesh_primitive_sphere(s_radius*500, {0,0,0}, 20, 40);
+    saturn.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, s_inclination);
+    saturn.drawable.uniform.shading.specular = 0.0f;
+    saturn.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/saturn/8k_saturn.png"));
+    planets.push_back(saturn);
+
+    // Uranus
+    planet uranus;
+    uranus = create_planet(u_radius, u_mass, u_p, u_v, u_inclination, u_force, u_orbitradius);
+    uranus.drawable = mesh_primitive_sphere(u_radius*1000, {0,0,0}, 20, 40);
+    uranus.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, u_inclination);
+    uranus.drawable.uniform.shading.specular = 0.0f;
+    uranus.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/uranus/8k_uranus.png"));
+    planets.push_back(uranus);
+
+    // Neptune
+    planet neptune;
+    neptune = create_planet(n_radius, n_mass, n_p, n_v, n_inclination, n_force, n_orbitradius);
+    neptune.drawable = mesh_primitive_sphere(n_radius*1000, {0,0,0}, 20, 40);
+    neptune.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, n_inclination);
+    neptune.drawable.uniform.shading.specular = 0.0f;
+    neptune.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/neptune/8k_neptune.png"));
+    planets.push_back(neptune);
 
     // Textures
     // Universe
@@ -106,17 +150,34 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     // *** Earth data update *** //
     // Using the list
-    vec3& p = planets[1].p;
-    vec3& v = planets[1].v;
+//    vec3& p = planets[1].p;
+//    vec3& v = planets[1].v;
 
-    vec3 F = planets[1].force;
+//    vec3 F = planets[1].force;
 
-    // Numerical integration
-    v = v + dt* F/planets[1].mass;
-    p = p + dt*v;
+//    // Numerical integration
+//    v = v + dt* F/planets[1].mass;
+//    p = p + dt*v;
 
-    planets[1].drawable.uniform.transform.translation = p;
-    planets[1].force = G * sun.mass * planets[1].mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
+//    planets[1].drawable.uniform.transform.translation = p;
+//    planets[1].force = G * sun.mass * planets[1].mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
+    // ************************* //
+
+    // *** Data update *** //
+    // Using the list
+    for(planet& it : planets){
+        vec3& p = it.p;
+        vec3& v = it.v;
+
+        vec3 F = it.force;
+
+        // Numerical integration
+        v = v + dt* F/it.mass;
+        p = p + dt*v;
+
+        it.drawable.uniform.transform.translation = p;
+        it.force = G * sun.mass * it.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
+    }
     // ************************* //
 
     // *** Draw the elements *** //
