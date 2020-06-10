@@ -21,8 +21,8 @@ static vec3 cardinal_spline_interpolation(float t, float t0, float t1, float t2,
 static vec3 cardinal_spline_interpolation_speed(float t, float t0, float t1, float t2, float t3, const vec3& p0, const vec3& p1, const vec3& p2, const vec3& p3, float K);
 mesh mesh_primitive_ellipsoid(float a, float b, float c, const vec3 &p0, size_t Nu, size_t Nv);
 star& create_star(float radius, float mass, vcl::vec3 p, vcl::vec3 v);
-planet& create_planet(float radius, float mass, vcl::vec3 p, vcl::vec3 v,  float inclination, vcl::vec3 force, float orbit_radius);
-std::vector<vcl::vec3> trajectory (float a, float b);  // Lembrar de apagar depois
+planet& create_planet(float radius, float mass, vcl::vec3 p, vcl::vec3 v,  float inclination, vcl::vec3 force, float orbit_radius, float vel_rot);
+std::vector<vcl::vec3> trajectory (float a, float b); // Lembrar de apagar depois
 mesh create_universe(float dimension);
 mesh create_ring(float r_int, float r_ext);
 
@@ -36,25 +36,25 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Setup initial camera mode and position
     scene.camera.camera_type = camera_control_spherical_coordinates;
-    scene.camera.scale = 10.0f;
+    scene.camera.scale = 25.0f;
     scene.camera.apply_rotation(0,0,0,1.2f);
 
     vec3 e_force = G * sun_mass * e_mass/(norm(e_p)*norm(e_p)) * -1.0f *normalize(e_p);
 
     // Universe creation
-    universe = create_universe(500.0f);
+    universe = create_universe(1100.0f);
     universe.uniform.shading = {1,0,0};
 
     // Stars creation
     // Sun
     sun = create_star(sun_radius, sun_mass, {0,0,0} , {0,0,0});
-    sun.drawable = mesh_primitive_sphere(sun_radius*100, {0,0,0}, 20, 40);
+    sun.drawable = mesh_primitive_sphere(sun_radius*100, {0,0,0}, 40, 80);
     sun.drawable.uniform.shading = {1,0,0};
 
     // Mercury
     planet mercury;
-    mercury = create_planet(m_radius, m_mass, m_p, m_v, m_inclination, m_force, m_orbitradius);
-    mercury.drawable = mesh_primitive_sphere(m_radius*1000, {0,0,0}, 20, 40);
+    mercury = create_planet(m_radius, m_mass, m_p, m_v, m_inclination, m_force, m_orbitradius, m_vel_rot);
+    mercury.drawable = mesh_primitive_sphere(m_radius*1000, {0,0,0}, 40, 80);
     mercury.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, m_inclination);
     mercury.drawable.uniform.shading.specular = 0.0f;
 //    mercury.drawable.uniform.transform.translation = {10.0f,0,0};
@@ -63,8 +63,8 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Venus
     planet venus;
-    venus = create_planet(v_radius, v_mass,v_p, v_v, v_inclination, v_force, v_orbitradius);
-    venus.drawable = mesh_primitive_sphere(v_radius*1000, {0,0,0}, 20, 40);
+    venus = create_planet(v_radius, v_mass,v_p, v_v, v_inclination, v_force, v_orbitradius, v_vel_rot);
+    venus.drawable = mesh_primitive_sphere(v_radius*1000, {0,0,0}, 40, 80);
     venus.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, v_inclination);
     venus.drawable.uniform.shading.specular = 0.0f;
     venus.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/venus/4k_venus.png"));
@@ -72,8 +72,8 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Earth
     planet earth;
-    earth = create_planet(e_radius, e_mass, e_p, e_v, e_inclination, e_force, e_orbitradius);
-    earth.drawable = mesh_primitive_sphere(e_radius*1000, {0,0,0}, 20, 40);
+    earth = create_planet(e_radius, e_mass, e_p, e_v, e_inclination, e_force, e_orbitradius, e_vel_rot);
+    earth.drawable = mesh_primitive_sphere(e_radius*1000, {0,0,0}, 40, 80);
     earth.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, e_inclination);
     earth.drawable.uniform.shading.specular = 0.0f;
     earth.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/earth/8k_earth.png"));
@@ -81,8 +81,8 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Mars
     planet mars;
-    mars = create_planet(ma_radius, ma_mass, ma_p, ma_v, ma_inclination, ma_force, ma_orbitradius);
-    mars.drawable = mesh_primitive_sphere(ma_radius*1000, {0,0,0}, 20, 40);
+    mars = create_planet(ma_radius, ma_mass, ma_p, ma_v, ma_inclination, ma_force, ma_orbitradius, ma_vel_rot);
+    mars.drawable = mesh_primitive_sphere(ma_radius*1000, {0,0,0}, 40, 80);
     mars.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, ma_inclination);
     mars.drawable.uniform.shading.specular = 0.0f;
     mars.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/mars/8k_mars.png"));
@@ -90,8 +90,8 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Jupiter
     planet jupiter;
-    jupiter = create_planet(j_radius, j_mass, j_p, j_v, j_inclination, j_force, j_orbitradius);
-    jupiter.drawable = mesh_primitive_sphere(j_radius*500, {0,0,0}, 20, 40);
+    jupiter = create_planet(j_radius, j_mass, j_p, j_v, j_inclination, j_force, j_orbitradius, j_vel_rot);
+    jupiter.drawable = mesh_primitive_sphere(j_radius*500, {0,0,0}, 40, 80);
     jupiter.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, j_inclination);
     jupiter.drawable.uniform.shading.specular = 0.0f;
     jupiter.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/jupiter/8k_jupiter.png"));
@@ -99,8 +99,8 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Saturn
     planet saturn;
-    saturn = create_planet(s_radius, s_mass, s_p, s_v, s_inclination, s_force, s_orbitradius);
-    saturn.drawable = mesh_primitive_sphere(s_radius*500, {0,0,0}, 20, 40);
+    saturn = create_planet(s_radius, s_mass, s_p, s_v, s_inclination, s_force, s_orbitradius, s_vel_rot);
+    saturn.drawable = mesh_primitive_sphere(s_radius*500, {0,0,0}, 40, 80);
     saturn.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, s_inclination);
     saturn.drawable.uniform.shading.specular = 0.0f;
     saturn.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/saturn/8k_saturn.png"));
@@ -108,8 +108,8 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Uranus
     planet uranus;
-    uranus = create_planet(u_radius, u_mass, u_p, u_v, u_inclination, u_force, u_orbitradius);
-    uranus.drawable = mesh_primitive_sphere(u_radius*1000, {0,0,0}, 20, 40);
+    uranus = create_planet(u_radius, u_mass, u_p, u_v, u_inclination, u_force, u_orbitradius, u_vel_rot);
+    uranus.drawable = mesh_primitive_sphere(u_radius*1000, {0,0,0}, 40, 80);
     uranus.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, u_inclination);
     uranus.drawable.uniform.shading.specular = 0.0f;
     uranus.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/uranus/2k_uranus.png"));
@@ -117,19 +117,19 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Neptune
     planet neptune;
-    neptune = create_planet(n_radius, n_mass, n_p, n_v, n_inclination, n_force, n_orbitradius);
-    neptune.drawable = mesh_primitive_sphere(n_radius*1000, {0,0,0}, 20, 40);
+    neptune = create_planet(n_radius, n_mass, n_p, n_v, n_inclination, n_force, n_orbitradius, n_vel_rot);
+    neptune.drawable = mesh_primitive_sphere(n_radius*1000, {0,0,0}, 40, 80);
     neptune.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, n_inclination);
     neptune.drawable.uniform.shading.specular = 0.0f;
     neptune.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/neptune/2k_neptune.png"));
     planets.push_back(neptune);
 
     // Saturn ring
-    saturn_ring = create_planet(s_radius, s_mass, s_p, s_v, s_inclination, s_force, s_orbitradius);
+    saturn_ring = create_planet(s_radius, s_mass, s_p, s_v, s_inclination, s_force, s_orbitradius, s_vel_rot);
     saturn_ring.drawable = create_ring(sr_int_radius*500, sr_ext_radius*500);
     saturn_ring.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, s_inclination);
-    saturn_ring.drawable.uniform.shading.specular = 0.0f;
-   // saturn_ring.drawable.uniform.shading = {1,0,0};
+   // saturn_ring.drawable.uniform.shading.specular = 0.0f;
+    saturn_ring.drawable.uniform.shading = {1,0,0};
     // Load a texture (with transparent background)
     saturn_ring.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/saturn/8k_saturn_ring_alpha.png"), GL_REPEAT, GL_REPEAT );
 
@@ -153,7 +153,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     set_gui(timer);
 
     // Simulation time step (dt)
-    float dt = timer.scale*0.01f;
+    float dt = timer.scale*0.001f;
 
     glEnable( GL_POLYGON_OFFSET_FILL ); // avoids z-fighting when displaying wireframe
 
@@ -169,8 +169,12 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         v = v + dt* F/it.mass;
         p = p + dt*v;
 
+        const mat3 Inclination = rotation_from_axis_angle_mat3({0,1,0}, it.inclination);
+        const mat3 Rotation = rotation_from_axis_angle_mat3({0,0,1}, it.hour);
+        it.drawable.uniform.transform.rotation = Inclination * Rotation;
         it.drawable.uniform.transform.translation = p;
         it.force = G * sun.mass * it.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
+        it.hour += it.vel_rot * dt;
     }
     // Saturn ring
     saturn_ring.drawable.uniform.transform.translation = planets[5].p;
@@ -311,172 +315,6 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
      }
  }
-// void scene_model::setup_mouvement_data(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& )
-// {
-//     // Initial Keyframe data vector of (position, time)
-//     keyframes = { { {-1,1,0}   , 0.0f  },
-//                   { {0,1,0}    , 1.0f  },
-//                   { {1,1,0}    , 2.0f  },
-//                   { {1,2,0}    , 2.5f  },
-//                   { {2,2,0}    , 3.0f  },
-//                   { {2,2,1}    , 3.5f  },
-//                   { {2,0,1.5}  , 3.75f  },
-//                   { {1.5,-1,1} , 4.5f  },
-//                   { {1.5,-1,0} , 5.0f  },
-//                   { {1,-1,0}   , 6.0f  },
-//                   { {0,-0.5,0} , 7.0f },
-//                   { {-1,-0.5,0}, 8.0f },
-//                 };
-
-//     // Set timer bounds
-//     // You should adapt these extremal values to the type of interpolation
-//     timer.t_min = keyframes[1].t;                   // first time of the keyframe
-//     timer.t_max = keyframes[keyframes.size()-2].t;  // last time of the keyframe
-//     timer.t = timer.t_min;
-
-//     // Prepare the visual elements
-//     const float radius_head = 0.12f;
-//     const float a = 0.15f;
-//     const float b = 0.1f;
-//     const float c = 0.25f;
-//     const float long_shoulder = 0.18f;
-//     const float radius_cone = 0.05f;
-
-//     // The geometry of the body is an ellipsoid
-//     mesh_drawable body = mesh_drawable( mesh_primitive_ellipsoid(a, b, c, {0,0,0} ,40, 40));
-
-//     // The geometry of the head is a sphere
-//     mesh_drawable head = mesh_drawable( mesh_primitive_sphere(radius_head, {0,0,0} ,40, 40));
-
-//     // Geometry of the eyes: black spheres
-//     mesh_drawable eye = mesh_drawable(mesh_primitive_sphere(0.02f, {0,0,0}, 20, 20));
-//     eye.uniform.color = {0,0,0};
-
-//     // Shoulder part and arm are displayed as cylinder
-//     mesh_drawable shoulder = mesh_primitive_quad({long_shoulder,0.0f,-0.1f},{0.0,0.0f,-0.1f},{0.0,0.0f,0.1f},{long_shoulder,0.0f,0.1f});
-//     mesh_drawable arm = mesh_primitive_quad({0.1,0.0f,-0.04f}, {0.0f,0.0f,-0.1f}, {0.0f,0.0f,0.1f}, {0.1,0.0f,0.04f});
-
-//     //Cone
-//     mesh_drawable cone =  mesh_primitive_cone(radius_cone, {0,0,0},{0,0,0.15f}, 20, 10);
-//     cone.uniform.color = {0.905f, 0.588f, 0.274f};
-
-
-
-//     timer.scale = 0.5f;
-
-//     keyframe_visual = mesh_primitive_sphere();
-//     keyframe_visual.shader = shaders["mesh"];
-//     keyframe_visual.uniform.color = {1,1,1};
-//     keyframe_visual.uniform.transform.scaling = 0.05f;
-
-//     keyframe_picked = mesh_primitive_sphere();
-//     keyframe_picked.shader = shaders["mesh"];
-//     keyframe_picked.uniform.color = {1,0,0};
-//     keyframe_picked.uniform.transform.scaling = 0.055f;
-
-//     segment_drawer.init();
-
-//     trajectory = curve_dynamic_drawable(100); // number of steps stored in the trajectory
-//     trajectory.uniform.color = {0,0,1};
-
-//     picked_object=-1;
-//     scene.camera.scale = 7.0f;
-// }
-
-
-// void scene_model::draw_mouvement_bodies(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& )
-// {
-//     timer.update();
-//     const float t = timer.t;
-
-//     if( t<timer.t_min+0.1f ) // clear trajectory when the timer restart
-//         trajectory.clear();
-
-//     set_gui();
-
-//     // ********************************************* //
-//     // Compute interpolated position at time t
-//     // ********************************************* //
-//     const int idx = index_at_value(t, keyframes);
-
-//     // Assume a closed curve trajectory
-//     const size_t N = keyframes.size();
-
-//     // Preparation of data for the linear interpolation
-//     // Parameters used to compute the linear interpolation
-//     const float t0 = keyframes[idx-1].t; // = t_{i-1}
-//     const float t1 = keyframes[idx  ].t; // = t_i
-//     const float t2 = keyframes[idx+1].t; // = t_{i+1}
-//     const float t3 = keyframes[idx+2].t; // = t_{i+2}
-
-//     const vec3& p0 = keyframes[idx-1].p; // = p_{i-1}
-//     const vec3& p1 = keyframes[idx  ].p; // = p_i
-//     const vec3& p2 = keyframes[idx+1].p; // = p_{i+1}
-//     const vec3& p3 = keyframes[idx+2].p; // = p_{i+2}
-
-//     const float K = 0.5;
-//     // Compute the linear interpolation here
-//     const vec3 p = cardinal_spline_interpolation(t,t0,t1,t2,t3,p0,p1,p2,p3,K);
-//     const vec3 dpdt = cardinal_spline_interpolation_speed(t,t0,t1,t2,t3,p0,p1,p2,p3,K);
-
-//     // Create and call a function cardinal_spline_interpolation(...) instead
-//     // ...
-
-//     // Store current trajectory of point p
-//     trajectory.add_point(p);
-//     mat3 const R1 = rotation_between_vector_mat3({0,0,1}, {0,1,0});
-//     mat3 const R2 = rotation_between_vector_mat3({0,-1,0}, {1,0,0});
-//     const float norm_dpdt = norm(dpdt);
-//     mat3 R_y = rotation_between_vector_mat3({1,0,0}, dpdt/norm_dpdt) * R2 *R1;
-//     if(dot(R_y*vec3(0,0,1), vec3(0,0,1)) < 0){
-//      mat3 const R = rotation_between_vector_mat3(R_y*vec3(0,0,1),-1.0f * R_y * vec3(0,0,1));
-//        R_y = R * R_y;
-//     }
-
-//       hierarchy["body"].transform.rotation = R_y;
-
-//     // Draw current position
-
-//     hierarchy["body"].transform.translation = p;
-//     draw_bird(scene, shaders);
-
-//     // Draw moving point trajectory
-//     trajectory.draw(shaders["curve"], scene.camera);
-
-
-//     // Draw sphere at each keyframe position
-//     if(gui_scene.display_keyframe) {
-//         for(size_t k=0; k<N; ++k)
-//         {
-//             const vec3& p_keyframe = keyframes[k].p;
-//             keyframe_visual.uniform.transform.translation = p_keyframe;
-//             draw(keyframe_visual, scene.camera);
-//         }
-//     }
-
-//     // Draw selected sphere in red
-//     if( picked_object!=-1 )
-//     {
-//         const vec3& p_keyframe = keyframes[picked_object].p;
-//         keyframe_picked.uniform.transform.translation = p_keyframe;
-//         draw(keyframe_picked, scene.camera);
-//     }
-
-
-//     // Draw segments between each keyframe
-//     if(gui_scene.display_polygon) {
-//         for(size_t k=0; k<keyframes.size()-1; ++k)
-//         {
-//             const vec3& pa = keyframes[k].p;
-//             const vec3& pb = keyframes[k+1].p;
-
-//             segment_drawer.uniform_parameter.p1 = pa;
-//             segment_drawer.uniform_parameter.p2 = pb;
-//             segment_drawer.draw(shaders["segment_im"], scene.camera);
-//         }
-//     }
-
-// }
 
 star& create_star(float radius, float mass, vec3 p, vec3 v){
     static star new_star;
@@ -488,12 +326,13 @@ star& create_star(float radius, float mass, vec3 p, vec3 v){
     return new_star;
 }
 
-planet& create_planet(float radius, float mass, vec3 p, vec3 v,  float inclination, vec3 force, float orbit_radius){
+planet& create_planet(float radius, float mass, vec3 p, vec3 v,  float inclination, vec3 force, float orbit_radius, float vel_rot){
     static planet new_planet;
     new_planet.mass = mass;
     new_planet.radius = radius;
     new_planet.p = p;
     new_planet.v = v;
+    new_planet.vel_rot = vel_rot;
 
     new_planet.inclination = inclination;
     new_planet.force = force;
@@ -586,7 +425,7 @@ mesh create_ring(float r_int, float r_ext)
  void scene_model::set_gui(timer_basic& timer)
  {
 //     ImGui::SliderFloat("Time", &timer.t, timer.t_min, timer.t_max);
-//     ImGui::SliderFloat("Time scale", &timer.scale, 0.1f, 3.0f);
+    ImGui::SliderFloat("Time scale", &timer.scale, 0.0f, 2.0f);
 
      ImGui::Text("Display: "); ImGui::SameLine();
      ImGui::Checkbox("keyframe", &gui_scene.display_keyframe); ImGui::SameLine();
