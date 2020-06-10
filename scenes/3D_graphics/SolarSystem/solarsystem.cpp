@@ -44,12 +44,14 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     // Universe creation
     universe = create_universe(1100.0f);
     universe.uniform.shading = {1,0,0};
+    universe.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/universe/8k_stars_milky.png"));
 
     // Stars creation
     // Sun
     sun = create_star(sun_radius, sun_mass, {0,0,0} , {0,0,0});
     sun.drawable = mesh_primitive_sphere(sun_radius*100, {0,0,0}, 40, 80);
     sun.drawable.uniform.shading = {1,0,0};
+    sun.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/sun/8k_sun.png"));
 
     // Mercury
     planet mercury;
@@ -133,12 +135,13 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     // Load a texture (with transparent background)
     saturn_ring.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/saturn/8k_saturn_ring_alpha.png"), GL_REPEAT, GL_REPEAT );
 
-    // Textures
-    // Universe
-    texture_universe_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/universe/8k_stars_milky.png"));
+    // Moon
+    moon = create_planet(mo_radius, mo_mass, mo_p, mo_v, mo_inclination, mo_force, mo_orbitradius, mo_vel_rot);
+    moon.drawable = mesh_primitive_sphere(mo_radius*1000, {0,0,0}, 40, 80);
+    moon.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, mo_inclination);
+    moon.drawable.uniform.shading.specular = 0.0f;
+    moon.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/moon/8k_moon.png"));
 
-    // Sun
-    texture_sun_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/sun/8k_sun.png"));
 }
 
 
@@ -158,6 +161,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glEnable( GL_POLYGON_OFFSET_FILL ); // avoids z-fighting when displaying wireframe
 
     // *** Data update *** //
+
     // Planets
     for(planet& it : planets){
         vec3& p = it.p;
@@ -176,9 +180,29 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         it.force = G * sun.mass * it.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
         it.hour += it.vel_rot * dt;
     }
+
+    // Moon
+    vec3& mo_p = moon.p;
+    vec3& mo_v = moon.v;
+
+    vec3 mo_F = moon.force;
+
+    // Numerical integration
+    mo_v = mo_v + dt* mo_F/moon.mass;
+    mo_p = mo_p + dt*mo_v;
+
+    const mat3 Inclination = rotation_from_axis_angle_mat3({0,1,0}, moon.inclination);
+    const mat3 Rotation = rotation_from_axis_angle_mat3({0,0,1}, moon.hour);
+    moon.drawable.uniform.transform.rotation = Inclination * Rotation;
+    moon.drawable.uniform.transform.translation = mo_p;
+ //   moon.force = G * sun.mass * moon.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
+    moon.force = G * sun.mass * moon.mass/(norm(mo_p)*norm(mo_p)) * -1.0f *normalize(mo_p) + G * planets[2].mass * moon.mass/(norm(planets[2].p - mo_p)*norm(planets[2].p - mo_p)) * -1.0f *normalize(mo_p - planets[2].p);
+    moon.hour += moon.vel_rot * dt;
+
     // Saturn ring
     saturn_ring.drawable.uniform.transform.translation = planets[5].p;
     saturn_ring.drawable.uniform.transform.rotation = planets[5].drawable.uniform.transform.rotation;
+
     // ************************* //
 
     // *** Draw the elements *** //
@@ -208,6 +232,13 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         draw(it.drawable, scene.camera, shaders["mesh"]);
         glBindTexture(GL_TEXTURE_2D, scene.texture_white);
     }
+
+    // Moon
+    glBindTexture(GL_TEXTURE_2D, moon.drawable.texture_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    draw(moon.drawable, scene.camera, shaders["mesh"]);
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
 
     // Saturn ring
     // Enable use of alpha component as color blending for transparent elements
@@ -240,6 +271,8 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         for(planet& it : planets){
             draw(it.drawable, scene.camera, shaders["wireframe"]);
         }
+        // Moon
+        draw(moon.drawable, scene.camera, shaders["wireframe"]);
         // Saturn ring
         draw(saturn_ring.drawable, scene.camera, shaders["wireframe"]);
     }
