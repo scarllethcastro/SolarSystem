@@ -107,7 +107,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     const mat3 Inclination = rotation_from_axis_angle_mat3({0,1,0}, moon.inclination);
     const mat3 Rotation = rotation_from_axis_angle_mat3({0,0,1}, moon.hour);
     moon.drawable.uniform.transform.rotation = Inclination * Rotation;
-    moon.drawable.uniform.transform.translation = mo_p + back*normalize(mo_p);
+    moon.drawable.uniform.transform.translation = mo_p + back*normalize(mo_p) + 2000*planets[2].radius* normalize(mo_p - planets[2].p);
  //   moon.force = G * sun.mass * moon.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
     moon.force = G * sun.mass * moon.mass/(norm(mo_p)*norm(mo_p)) * -1.0f *normalize(mo_p) + G * planets[2].mass * moon.mass/(norm(planets[2].p - mo_p)*norm(planets[2].p - mo_p)) * -1.0f *normalize(mo_p - planets[2].p);
     moon.hour += moon.vel_rot * dt;
@@ -118,7 +118,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     // ************************* //
 
-    for (int i=0; i<9; i++){
+    for (int i=0; i<10; i++){
     if (gui_scene.stars[i]){
         if(i<8){
         scene.camera.translation = -planets[i].drawable.uniform.transform.translation;
@@ -126,7 +126,11 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         }else if(i==8)
         {
             scene.camera.translation = -sun.drawable.uniform.transform.translation;
-        }else scene.camera.translation = -sun.drawable.uniform.transform.translation;
+            break;
+        }else if(i==9){
+            scene.camera.translation = -moon.drawable.uniform.transform.translation;
+            break;
+        }
     }
     }
     // *** Draw the elements *** //
@@ -537,7 +541,8 @@ void scene_model::setup_moon()
 //     ImGui::SliderFloat("Time", &timer.t, timer.t_min, timer.t_max);
     ImGui::SliderFloat("Time scale", &timer.scale, 0.0f, 2.0f);
 
-     ImGui::Text("Display: "); ImGui::SameLine();
+     ImGui::Text("Stars: "); ImGui::NewLine();
+
      //Planets
      ImGui::Checkbox("Mercury", &gui_scene.stars[0]); ImGui::NewLine();
      ImGui::Checkbox("Venus", &gui_scene.stars[1]); ImGui::NewLine();
@@ -548,13 +553,11 @@ void scene_model::setup_moon()
      ImGui::Checkbox("Uranus", &gui_scene.stars[6]); ImGui::NewLine();
      ImGui::Checkbox("Neptune", &gui_scene.stars[7]); ImGui::NewLine();
      ImGui::Checkbox("Sun", &gui_scene.stars[8]); ImGui::NewLine();
-     ImGui::Checkbox("Moon", &gui_scene.stars[8]); ImGui::NewLine();
+     ImGui::Checkbox("Moon", &gui_scene.stars[9]); ImGui::NewLine();
 
 
      ImGui::Text("Display: "); ImGui::SameLine();
      ImGui::Checkbox("Wireframe", &gui_scene.wireframe); ImGui::SameLine();
-     ImGui::Checkbox("Surface", &gui_scene.surface);     ImGui::SameLine();
-     ImGui::Checkbox("Skeleton", &gui_scene.skeleton);   ImGui::SameLine();
 
  }
 
