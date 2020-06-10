@@ -21,7 +21,7 @@ static vec3 cardinal_spline_interpolation(float t, float t0, float t1, float t2,
 static vec3 cardinal_spline_interpolation_speed(float t, float t0, float t1, float t2, float t3, const vec3& p0, const vec3& p1, const vec3& p2, const vec3& p3, float K);
 mesh mesh_primitive_ellipsoid(float a, float b, float c, const vec3 &p0, size_t Nu, size_t Nv);
 star& create_star(float radius, float mass, vcl::vec3 p, vcl::vec3 v);
-planet& create_planet(float radius, float mass, vcl::vec3 p, vcl::vec3 v,  float inclination, vcl::vec3 force, float orbit_radius);
+planet& create_planet(float radius, float mass, vcl::vec3 p, vcl::vec3 v,  float inclination, vcl::vec3 force, float orbit_radius, float vel_rot);
 std::vector<vcl::vec3> trajectory (float a, float b);
 mesh create_universe(float dimension);
 
@@ -52,7 +52,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Mercury
     planet mercury;
-    mercury = create_planet(m_radius, m_mass, m_p, m_v, m_inclination, m_force, m_orbitradius);
+    mercury = create_planet(m_radius, m_mass, m_p, m_v, m_inclination, m_force, m_orbitradius, m_vel_rot);
     mercury.drawable = mesh_primitive_sphere(m_radius*1000, {0,0,0}, 20, 40);
     mercury.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, m_inclination);
     mercury.drawable.uniform.shading.specular = 0.0f;
@@ -62,7 +62,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Venus
     planet venus;
-    venus = create_planet(v_radius, v_mass,v_p, v_v, v_inclination, v_force, v_orbitradius);
+    venus = create_planet(v_radius, v_mass,v_p, v_v, v_inclination, v_force, v_orbitradius, v_vel_rot);
     venus.drawable = mesh_primitive_sphere(v_radius*1000, {0,0,0}, 20, 40);
     venus.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, v_inclination);
     venus.drawable.uniform.shading.specular = 0.0f;
@@ -71,7 +71,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Earth
     planet earth;
-    earth = create_planet(e_radius, e_mass, e_p, e_v, e_inclination, e_force, e_orbitradius);
+    earth = create_planet(e_radius, e_mass, e_p, e_v, e_inclination, e_force, e_orbitradius, e_vel_rot);
     earth.drawable = mesh_primitive_sphere(e_radius*1000, {0,0,0}, 20, 40);
     earth.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, e_inclination);
     earth.drawable.uniform.shading.specular = 0.0f;
@@ -80,7 +80,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Mars
     planet mars;
-    mars = create_planet(ma_radius, ma_mass, ma_p, ma_v, ma_inclination, ma_force, ma_orbitradius);
+    mars = create_planet(ma_radius, ma_mass, ma_p, ma_v, ma_inclination, ma_force, ma_orbitradius, ma_vel_rot);
     mars.drawable = mesh_primitive_sphere(ma_radius*1000, {0,0,0}, 20, 40);
     mars.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, ma_inclination);
     mars.drawable.uniform.shading.specular = 0.0f;
@@ -89,7 +89,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Jupiter
     planet jupiter;
-    jupiter = create_planet(j_radius, j_mass, j_p, j_v, j_inclination, j_force, j_orbitradius);
+    jupiter = create_planet(j_radius, j_mass, j_p, j_v, j_inclination, j_force, j_orbitradius, j_vel_rot);
     jupiter.drawable = mesh_primitive_sphere(j_radius*500, {0,0,0}, 20, 40);
     jupiter.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, j_inclination);
     jupiter.drawable.uniform.shading.specular = 0.0f;
@@ -98,7 +98,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Saturn
     planet saturn;
-    saturn = create_planet(s_radius, s_mass, s_p, s_v, s_inclination, s_force, s_orbitradius);
+    saturn = create_planet(s_radius, s_mass, s_p, s_v, s_inclination, s_force, s_orbitradius, s_vel_rot);
     saturn.drawable = mesh_primitive_sphere(s_radius*500, {0,0,0}, 20, 40);
     saturn.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, s_inclination);
     saturn.drawable.uniform.shading.specular = 0.0f;
@@ -107,7 +107,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Uranus
     planet uranus;
-    uranus = create_planet(u_radius, u_mass, u_p, u_v, u_inclination, u_force, u_orbitradius);
+    uranus = create_planet(u_radius, u_mass, u_p, u_v, u_inclination, u_force, u_orbitradius, u_vel_rot);
     uranus.drawable = mesh_primitive_sphere(u_radius*1000, {0,0,0}, 20, 40);
     uranus.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, u_inclination);
     uranus.drawable.uniform.shading.specular = 0.0f;
@@ -116,7 +116,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Neptune
     planet neptune;
-    neptune = create_planet(n_radius, n_mass, n_p, n_v, n_inclination, n_force, n_orbitradius);
+    neptune = create_planet(n_radius, n_mass, n_p, n_v, n_inclination, n_force, n_orbitradius, n_vel_rot);
     neptune.drawable = mesh_primitive_sphere(n_radius*1000, {0,0,0}, 20, 40);
     neptune.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, n_inclination);
     neptune.drawable.uniform.shading.specular = 0.0f;
@@ -143,7 +143,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     set_gui(timer);
 
     // Simulation time step (dt)
-    float dt = timer.scale*0.01f;
+    float dt = timer.scale*0.001f;
 
     glEnable( GL_POLYGON_OFFSET_FILL ); // avoids z-fighting when displaying wireframe
 
@@ -159,8 +159,12 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         v = v + dt* F/it.mass;
         p = p + dt*v;
 
+        const mat3 Inclination = rotation_from_axis_angle_mat3({0,1,0}, it.inclination);
+        const mat3 Rotation = rotation_from_axis_angle_mat3({0,0,1}, it.hour);
+        it.drawable.uniform.transform.rotation = Inclination * Rotation;
         it.drawable.uniform.transform.translation = p;
         it.force = G * sun.mass * it.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
+        it.hour += it.vel_rot * dt;
     }
     // ************************* //
 
@@ -286,12 +290,13 @@ star& create_star(float radius, float mass, vec3 p, vec3 v){
     return new_star;
 }
 
-planet& create_planet(float radius, float mass, vec3 p, vec3 v,  float inclination, vec3 force, float orbit_radius){
+planet& create_planet(float radius, float mass, vec3 p, vec3 v,  float inclination, vec3 force, float orbit_radius, float vel_rot){
     static planet new_planet;
     new_planet.mass = mass;
     new_planet.radius = radius;
     new_planet.p = p;
     new_planet.v = v;
+    new_planet.vel_rot = vel_rot;
 
     new_planet.inclination = inclination;
     new_planet.force = force;

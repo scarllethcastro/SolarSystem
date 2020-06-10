@@ -34,6 +34,8 @@ struct planet: star {
     float inclination;
     vcl::vec3 force;
     float orbit_radius; // axis a
+    float vel_rot;
+    float hour =0;
 
 };
 
