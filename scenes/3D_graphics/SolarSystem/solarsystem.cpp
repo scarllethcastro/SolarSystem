@@ -35,13 +35,13 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
 
     // Setup initial camera mode and position
     scene.camera.camera_type = camera_control_spherical_coordinates;
-    scene.camera.scale = 10.0f;
+    scene.camera.scale = 25.0f;
     scene.camera.apply_rotation(0,0,0,1.2f);
 
     vec3 e_force = G * sun_mass * e_mass/(norm(e_p)*norm(e_p)) * -1.0f *normalize(e_p);
 
     // Universe creation
-    universe = create_universe(500.0f);
+    universe = create_universe(1100.0f);
     universe.uniform.shading = {1,0,0};
 
     // Stars creation
@@ -111,7 +111,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     uranus.drawable = mesh_primitive_sphere(u_radius*1000, {0,0,0}, 20, 40);
     uranus.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, u_inclination);
     uranus.drawable.uniform.shading.specular = 0.0f;
-    uranus.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/uranus/8k_uranus.png"));
+    uranus.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/uranus/2k_uranus.png"));
     planets.push_back(uranus);
 
     // Neptune
@@ -120,7 +120,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     neptune.drawable = mesh_primitive_sphere(n_radius*1000, {0,0,0}, 20, 40);
     neptune.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, n_inclination);
     neptune.drawable.uniform.shading.specular = 0.0f;
-    neptune.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/neptune/8k_neptune.png"));
+    neptune.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/neptune/2k_neptune.png"));
     planets.push_back(neptune);
 
     // Textures
@@ -531,7 +531,7 @@ mesh create_universe(float dimension){
  void scene_model::set_gui(timer_basic& timer)
  {
 //     ImGui::SliderFloat("Time", &timer.t, timer.t_min, timer.t_max);
-//     ImGui::SliderFloat("Time scale", &timer.scale, 0.1f, 3.0f);
+    ImGui::SliderFloat("Time scale", &timer.scale, 0.0f, 2.0f);
 
      ImGui::Text("Display: "); ImGui::SameLine();
      ImGui::Checkbox("keyframe", &gui_scene.display_keyframe); ImGui::SameLine();

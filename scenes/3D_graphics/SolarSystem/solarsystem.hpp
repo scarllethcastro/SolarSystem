@@ -81,7 +81,7 @@ struct scene_model : scene_base
     vcl::hierarchy_mesh_drawable_display_skeleton hierarchy_visual_debug;
     vcl::mesh_drawable ground;
 
-    vcl::timer_event timer;    // Timer allowing to indicate periodic events
+    vcl::timer_interval timer;    // Timer allowing to indicate periodic events
 
     // Universe
     vcl::mesh_drawable universe;

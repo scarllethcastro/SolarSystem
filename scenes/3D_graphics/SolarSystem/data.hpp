@@ -90,7 +90,7 @@ vcl::vec3 s_v = {0,s_vp, 0};
 vcl::vec3 s_force = G * sun_mass * s_mass/(norm(s_p)*norm(s_p)) * -1.0f *normalize(s_p);
 
 //URANUS
-float u_radius = 25.559 * km;
+float u_radius = 25559 * km;
 float u_mass = 8.686 * 1.0e+25;
 float u_inclination = 97.77 *3.14/180;
 float u_orbitinclination = 0.774 * 3.14/180;
@@ -102,7 +102,7 @@ vcl::vec3 u_v = {0,u_vp, 0};
 vcl::vec3 u_force = G * sun_mass *u_mass/(norm(u_p)*norm(u_p)) * -1.0f *normalize(u_p);
 
 //NEPTUNE
-float n_radius = 24.746 * km;
+float n_radius = 24746 * km;
 float n_mass = 1.024 * 1.0e+26;
 float n_inclination = 28.31 * 3.14/180;
 float n_orbitinclination = 1.774 * 3.14/180;
