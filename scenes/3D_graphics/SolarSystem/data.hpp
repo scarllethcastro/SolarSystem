@@ -1,6 +1,6 @@
 #pragma once
-const float km = 1.0e-7;
-const float kminv = 1.0e7;
+const float km =  1.0e-7;
+const float kminv =  1.0e7;
 const float m = 1.0e-3 * km;
 const float minv = kminv/1000;
 const float s = 1/(3600*24*30); //time in months
@@ -9,14 +9,13 @@ const float h = 3600*s;
 const float hinv = sinv/3600;
 const float kg = 1.0e-27;
 const float kginv = 1.0e+27;
-
-
 // Gravitational constant
 const float G = 6.674 * (1.0e-11) * (m*m*m) * kginv *sinv *sinv;
 
 // SUN
 float sun_radius = 696340 * km;//0.069634;
 float sun_mass = 1.989 * 1e+30 * kg;
+const float back = sun_radius*250;
 
 const float vel_aux = 2*G*sun_mass; //for velocity calculation
 
@@ -84,7 +83,7 @@ float j_vel_rot = hinv * (2*3.14)/10;
 
 //SATURN
 float s_radius = 60268 * km;
-float s_mass = 5.6846 * 1.0e+26 * kg;
+float s_mass = 5.6846 * 1.0e+26 *kg;
 float s_inclination = 5.51 *3.14/180;
 float s_orbitinclination = 2.49 * 3.14/180;
 float s_orbitradius = 1433449370 *km;
@@ -101,7 +100,7 @@ float sr_ext_radius = 140210 * km;
 
 //URANUS
 float u_radius = 25559 * km;
-float u_mass = 8.686 * 1.0e+25 * kg;
+float u_mass = 8.686 * 1.0e+25 *kg;
 float u_inclination = 97.77 *3.14/180;
 float u_orbitinclination = 0.774 * 3.14/180;
 float u_orbitradius = 2876679082 *km;

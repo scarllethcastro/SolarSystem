@@ -49,7 +49,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     // Stars creation
     // Sun
     sun = create_star(sun_radius, sun_mass, {0,0,0} , {0,0,0});
-    sun.drawable = mesh_primitive_sphere(sun_radius*100, {0,0,0}, 40, 80);
+    sun.drawable = mesh_primitive_sphere(sun_radius*200, {0,0,0}, 40, 80);
     sun.drawable.uniform.shading = {1,0,0};
     sun.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/sun/8k_sun.png"));
 
@@ -125,7 +125,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     neptune.drawable.uniform.shading.specular = 0.0f;
     neptune.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/neptune/2k_neptune.png"));
     planets.push_back(neptune);
-
+    std::cout << saturn.force << std::endl;
     // Saturn ring
     saturn_ring = create_planet(s_radius, s_mass, s_p, s_v, s_inclination, s_force, s_orbitradius, s_vel_rot);
     saturn_ring.drawable = create_ring(sr_int_radius*500, sr_ext_radius*500);
@@ -176,7 +176,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         const mat3 Inclination = rotation_from_axis_angle_mat3({0,1,0}, it.inclination);
         const mat3 Rotation = rotation_from_axis_angle_mat3({0,0,1}, it.hour);
         it.drawable.uniform.transform.rotation = Inclination * Rotation;
-        it.drawable.uniform.transform.translation = p;
+        it.drawable.uniform.transform.translation = p + back*normalize(p);
         it.force = G * sun.mass * it.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
         it.hour += it.vel_rot * dt;
     }
@@ -200,11 +200,22 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     moon.hour += moon.vel_rot * dt;
 
     // Saturn ring
-    saturn_ring.drawable.uniform.transform.translation = planets[5].p;
+    saturn_ring.drawable.uniform.transform.translation = planets[5].drawable.uniform.transform.translation;
     saturn_ring.drawable.uniform.transform.rotation = planets[5].drawable.uniform.transform.rotation;
 
     // ************************* //
 
+    for (int i=0; i<9; i++){
+    if (gui_scene.stars[i]){
+        if(i<8){
+        scene.camera.translation = -planets[i].drawable.uniform.transform.translation;
+        break;
+        }else if(i==8)
+        {
+            scene.camera.translation = -sun.drawable.uniform.transform.translation;
+        }else scene.camera.translation = -sun.drawable.uniform.transform.translation;
+    }
+    }
     // *** Draw the elements *** //
 
     // Universe
@@ -461,8 +472,19 @@ mesh create_ring(float r_int, float r_ext)
     ImGui::SliderFloat("Time scale", &timer.scale, 0.0f, 2.0f);
 
      ImGui::Text("Display: "); ImGui::SameLine();
-     ImGui::Checkbox("keyframe", &gui_scene.display_keyframe); ImGui::SameLine();
-     ImGui::Checkbox("polygon", &gui_scene.display_polygon);
+     //Planets
+     ImGui::Checkbox("Mercury", &gui_scene.stars[0]); ImGui::NewLine();
+     ImGui::Checkbox("Venus", &gui_scene.stars[1]); ImGui::NewLine();
+     ImGui::Checkbox("Earth", &gui_scene.stars[2]); ImGui::NewLine();
+     ImGui::Checkbox("Mars", &gui_scene.stars[3]); ImGui::NewLine();
+     ImGui::Checkbox("Jupiter", &gui_scene.stars[4]); ImGui::NewLine();
+     ImGui::Checkbox("Saturn", &gui_scene.stars[5]); ImGui::NewLine();
+     ImGui::Checkbox("Uranus", &gui_scene.stars[6]); ImGui::NewLine();
+     ImGui::Checkbox("Neptune", &gui_scene.stars[7]); ImGui::NewLine();
+     ImGui::Checkbox("Sun", &gui_scene.stars[8]); ImGui::NewLine();
+     ImGui::Checkbox("Moon", &gui_scene.stars[8]); ImGui::NewLine();
+
+
      ImGui::Text("Display: "); ImGui::SameLine();
      ImGui::Checkbox("Wireframe", &gui_scene.wireframe); ImGui::SameLine();
      ImGui::Checkbox("Surface", &gui_scene.surface);     ImGui::SameLine();
