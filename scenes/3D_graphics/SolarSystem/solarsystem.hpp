@@ -91,8 +91,9 @@ struct scene_model : scene_base
 
     // Planets
     std::vector<planet> planets;
-//    planet mercury;
-//    planet earth;
+
+    // Saturn ring
+    planet saturn_ring;
 
     // Textures
     GLuint texture_universe_id;

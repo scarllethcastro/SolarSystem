@@ -22,8 +22,9 @@ static vec3 cardinal_spline_interpolation_speed(float t, float t0, float t1, flo
 mesh mesh_primitive_ellipsoid(float a, float b, float c, const vec3 &p0, size_t Nu, size_t Nv);
 star& create_star(float radius, float mass, vcl::vec3 p, vcl::vec3 v);
 planet& create_planet(float radius, float mass, vcl::vec3 p, vcl::vec3 v,  float inclination, vcl::vec3 force, float orbit_radius);
-std::vector<vcl::vec3> trajectory (float a, float b);
+std::vector<vcl::vec3> trajectory (float a, float b);  // Lembrar de apagar depois
 mesh create_universe(float dimension);
+mesh create_ring(float r_int, float r_ext);
 
 
 /** This function is called before the beginning of the animation loop
@@ -111,7 +112,7 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     uranus.drawable = mesh_primitive_sphere(u_radius*1000, {0,0,0}, 20, 40);
     uranus.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, u_inclination);
     uranus.drawable.uniform.shading.specular = 0.0f;
-    uranus.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/uranus/8k_uranus.png"));
+    uranus.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/uranus/2k_uranus.png"));
     planets.push_back(uranus);
 
     // Neptune
@@ -120,8 +121,17 @@ void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& sc
     neptune.drawable = mesh_primitive_sphere(n_radius*1000, {0,0,0}, 20, 40);
     neptune.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, n_inclination);
     neptune.drawable.uniform.shading.specular = 0.0f;
-    neptune.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/neptune/8k_neptune.png"));
+    neptune.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/neptune/2k_neptune.png"));
     planets.push_back(neptune);
+
+    // Saturn ring
+    saturn_ring = create_planet(s_radius, s_mass, s_p, s_v, s_inclination, s_force, s_orbitradius);
+    saturn_ring.drawable = create_ring(sr_int_radius*500, sr_ext_radius*500);
+    saturn_ring.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, s_inclination);
+    saturn_ring.drawable.uniform.shading.specular = 0.0f;
+   // saturn_ring.drawable.uniform.shading = {1,0,0};
+    // Load a texture (with transparent background)
+    saturn_ring.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/saturn/8k_saturn_ring_alpha.png"), GL_REPEAT, GL_REPEAT );
 
     // Textures
     // Universe
@@ -147,24 +157,8 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     glEnable( GL_POLYGON_OFFSET_FILL ); // avoids z-fighting when displaying wireframe
 
-
-    // *** Earth data update *** //
-    // Using the list
-//    vec3& p = planets[1].p;
-//    vec3& v = planets[1].v;
-
-//    vec3 F = planets[1].force;
-
-//    // Numerical integration
-//    v = v + dt* F/planets[1].mass;
-//    p = p + dt*v;
-
-//    planets[1].drawable.uniform.transform.translation = p;
-//    planets[1].force = G * sun.mass * planets[1].mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
-    // ************************* //
-
     // *** Data update *** //
-    // Using the list
+    // Planets
     for(planet& it : planets){
         vec3& p = it.p;
         vec3& v = it.v;
@@ -178,6 +172,9 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         it.drawable.uniform.transform.translation = p;
         it.force = G * sun.mass * it.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
     }
+    // Saturn ring
+    saturn_ring.drawable.uniform.transform.translation = planets[5].p;
+    saturn_ring.drawable.uniform.transform.rotation = planets[5].drawable.uniform.transform.rotation;
     // ************************* //
 
     // *** Draw the elements *** //
@@ -208,6 +205,27 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         glBindTexture(GL_TEXTURE_2D, scene.texture_white);
     }
 
+    // Saturn ring
+    // Enable use of alpha component as color blending for transparent elements
+    //  new color = previous color + (1-alpha) current color
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Disable depth buffer writing
+    //  - Transparent elements cannot use depth buffer
+    //  - They are supposed to be display from furest to nearest elements
+    glDepthMask(false);
+
+    glBindTexture(GL_TEXTURE_2D, saturn_ring.drawable.texture_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // avoids sampling artifacts
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // avoids sampling artifacts
+
+    draw(saturn_ring.drawable, scene.camera, shaders["mesh"]);
+
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+    glDepthMask(true);
+
+    // Wireframe
     if( gui_scene.wireframe ){ // wireframe if asked from the GUI
         glPolygonOffset( 1.0, 1.0 );
         // Universe
@@ -218,6 +236,8 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         for(planet& it : planets){
             draw(it.drawable, scene.camera, shaders["wireframe"]);
         }
+        // Saturn ring
+        draw(saturn_ring.drawable, scene.camera, shaders["wireframe"]);
     }
     // ************************* //
 }
@@ -528,6 +548,41 @@ mesh create_universe(float dimension){
     return sky;
 }
 
+mesh create_ring(float r_int, float r_ext)
+{
+    mesh ring;
+
+    // Number of retangles
+    size_t N = 100;
+
+    // Minimum angle
+    float theta = 2*3.14f/float(N);
+
+    for(int i = 0; i < N; i++){
+        // Geometry
+        vec3 point0 = {r_int*std::cos(i*theta),r_int*std::sin(i*theta),0};
+        vec3 point1 = {r_ext*std::cos(i*theta),r_ext*std::sin(i*theta),0};
+        vec3 point2 = {r_int*std::cos((i+1)*theta),r_int*std::sin((i+1)*theta),0};
+        vec3 point3 = {r_ext*std::cos((i+1)*theta),r_ext*std::sin((i+1)*theta),0};
+        ring.position.push_back(point0);
+        ring.position.push_back(point1);
+        ring.position.push_back(point2);
+        ring.position.push_back(point3);
+
+        // Connectivity
+        ring.connectivity.push_back({i*4,i*4+1,i*4+2});
+        ring.connectivity.push_back({i*4+1,i*4+2,i*4+3});
+
+        // Texture
+        ring.texture_uv.push_back(vec2(0,1));
+        ring.texture_uv.push_back(vec2(1,1));
+        ring.texture_uv.push_back(vec2(0,0));
+        ring.texture_uv.push_back(vec2(1,0));
+    }
+
+    return ring;
+}
+
  void scene_model::set_gui(timer_basic& timer)
  {
 //     ImGui::SliderFloat("Time", &timer.t, timer.t_min, timer.t_max);
@@ -555,7 +610,6 @@ mesh create_universe(float dimension){
      }
 
  }
-
 
 
  static size_t index_at_value(float t, vcl::buffer<vec3t> const& v)

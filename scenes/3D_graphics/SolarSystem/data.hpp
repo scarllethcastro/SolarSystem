@@ -89,6 +89,10 @@ float s_vp = sqrt(vel_aux * (1/s_rp - 1/(2*s_orbitradius)));
 vcl::vec3 s_v = {0,s_vp, 0};
 vcl::vec3 s_force = G * sun_mass * s_mass/(norm(s_p)*norm(s_p)) * -1.0f *normalize(s_p);
 
+//SATURN RING
+float sr_int_radius = 67000 * km;
+float sr_ext_radius = 140210 * km;
+
 //URANUS
 float u_radius = 25.559 * km;
 float u_mass = 8.686 * 1.0e+25;
