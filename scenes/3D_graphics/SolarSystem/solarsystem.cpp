@@ -205,7 +205,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
     // ************************* //
 
-    for (int i=0; i<9; i++){
+    for (int i=0; i<10; i++){
     if (gui_scene.stars[i]){
         if(i<8){
         scene.camera.translation = -planets[i].drawable.uniform.transform.translation;
@@ -213,7 +213,11 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         }else if(i==8)
         {
             scene.camera.translation = -sun.drawable.uniform.transform.translation;
-        }else scene.camera.translation = -sun.drawable.uniform.transform.translation;
+            break;
+        }else if(i==9){
+            scene.camera.translation = -moon.drawable.uniform.transform.translation;
+            break;
+        }
     }
     }
     // *** Draw the elements *** //
@@ -471,7 +475,8 @@ mesh create_ring(float r_int, float r_ext)
 //     ImGui::SliderFloat("Time", &timer.t, timer.t_min, timer.t_max);
     ImGui::SliderFloat("Time scale", &timer.scale, 0.0f, 2.0f);
 
-     ImGui::Text("Display: "); ImGui::SameLine();
+     ImGui::Text("Stars: "); ImGui::NewLine();
+
      //Planets
      ImGui::Checkbox("Mercury", &gui_scene.stars[0]); ImGui::NewLine();
      ImGui::Checkbox("Venus", &gui_scene.stars[1]); ImGui::NewLine();
@@ -482,26 +487,11 @@ mesh create_ring(float r_int, float r_ext)
      ImGui::Checkbox("Uranus", &gui_scene.stars[6]); ImGui::NewLine();
      ImGui::Checkbox("Neptune", &gui_scene.stars[7]); ImGui::NewLine();
      ImGui::Checkbox("Sun", &gui_scene.stars[8]); ImGui::NewLine();
-     ImGui::Checkbox("Moon", &gui_scene.stars[8]); ImGui::NewLine();
+     ImGui::Checkbox("Moon", &gui_scene.stars[9]); ImGui::NewLine();
 
 
      ImGui::Text("Display: "); ImGui::SameLine();
      ImGui::Checkbox("Wireframe", &gui_scene.wireframe); ImGui::SameLine();
-     ImGui::Checkbox("Surface", &gui_scene.surface);     ImGui::SameLine();
-     ImGui::Checkbox("Skeleton", &gui_scene.skeleton);   ImGui::SameLine();
-
-     if( ImGui::Button("Print Keyframe") )
-     {
-         std::cout<<"keyframe_position={";
-         for(size_t k=0; k<keyframes.size(); ++k)
-         {
-             const vec3& p = keyframes[k].p;
-             std::cout<< "{"<<p.x<<"f,"<<p.y<<"f,"<<p.z<<"f}";
-             if(k<keyframes.size()-1)
-                 std::cout<<", ";
-         }
-         std::cout<<"}"<<std::endl;
-     }
 
  }
 
