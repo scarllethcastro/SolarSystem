@@ -22,7 +22,6 @@ static vec3 cardinal_spline_interpolation_speed(float t, float t0, float t1, flo
 mesh mesh_primitive_ellipsoid(float a, float b, float c, const vec3 &p0, size_t Nu, size_t Nv);
 star& create_star(float radius, float mass, vcl::vec3 p, vcl::vec3 v);
 planet& create_planet(float radius, float mass, vcl::vec3 p, vcl::vec3 v,  float inclination, vcl::vec3 force, float orbit_radius, float vel_rot);
-std::vector<vcl::vec3> trajectory (float a, float b); // Lembrar de apagar depois
 mesh create_universe(float dimension);
 mesh create_ring(float r_int, float r_ext);
 
@@ -31,117 +30,31 @@ mesh create_ring(float r_int, float r_ext);
     It is used to initialize all part-specific data */
 void scene_model::setup_data(std::map<std::string,GLuint>& , scene_structure& scene, gui_structure& gui )
 {
-    std::cout << "G = " << G << std::endl;
-    // Create visual terrain surface
-
     // Setup initial camera mode and position
     scene.camera.camera_type = camera_control_spherical_coordinates;
     scene.camera.scale = 25.0f;
     scene.camera.apply_rotation(0,0,0,1.2f);
 
-    vec3 e_force = G * sun_mass * e_mass/(norm(e_p)*norm(e_p)) * -1.0f *normalize(e_p);
+//    vec3 e_force = G * sun_mass * e_mass/(norm(e_p)*norm(e_p)) * -1.0f *normalize(e_p);
 
     // Universe creation
-    universe = create_universe(1100.0f);
-    universe.uniform.shading = {1,0,0};
-    universe.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/universe/8k_stars_milky.png"));
+    setup_universe();
 
-    // Stars creation
-    // Sun
-    sun = create_star(sun_radius, sun_mass, {0,0,0} , {0,0,0});
-    sun.drawable = mesh_primitive_sphere(sun_radius*200, {0,0,0}, 40, 80);
-    sun.drawable.uniform.shading = {1,0,0};
-    sun.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/sun/8k_sun.png"));
+    // Sun creation
+    setup_sun();
 
-    // Mercury
-    planet mercury;
-    mercury = create_planet(m_radius, m_mass, m_p, m_v, m_inclination, m_force, m_orbitradius, m_vel_rot);
-    mercury.drawable = mesh_primitive_sphere(m_radius*1000, {0,0,0}, 40, 80);
-    mercury.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, m_inclination);
-    mercury.drawable.uniform.shading.specular = 0.0f;
-//    mercury.drawable.uniform.transform.translation = {10.0f,0,0};
-    mercury.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/mercury/8k_mercury.png"));
-    planets.push_back(mercury);
+    // Planets creation
+    setup_mercury();
+    setup_venus();
+    setup_earth();
+    setup_mars();
+    setup_jupiter();
+    setup_saturn();
+    setup_uranus();
+    setup_neptune();
 
-    // Venus
-    planet venus;
-    venus = create_planet(v_radius, v_mass,v_p, v_v, v_inclination, v_force, v_orbitradius, v_vel_rot);
-    venus.drawable = mesh_primitive_sphere(v_radius*1000, {0,0,0}, 40, 80);
-    venus.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, v_inclination);
-    venus.drawable.uniform.shading.specular = 0.0f;
-    venus.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/venus/4k_venus.png"));
-    planets.push_back(venus);
-
-    // Earth
-    planet earth;
-    earth = create_planet(e_radius, e_mass, e_p, e_v, e_inclination, e_force, e_orbitradius, e_vel_rot);
-    earth.drawable = mesh_primitive_sphere(e_radius*1000, {0,0,0}, 40, 80);
-    earth.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, e_inclination);
-    earth.drawable.uniform.shading.specular = 0.0f;
-    earth.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/earth/8k_earth.png"));
-    planets.push_back(earth);
-
-    // Mars
-    planet mars;
-    mars = create_planet(ma_radius, ma_mass, ma_p, ma_v, ma_inclination, ma_force, ma_orbitradius, ma_vel_rot);
-    mars.drawable = mesh_primitive_sphere(ma_radius*1000, {0,0,0}, 40, 80);
-    mars.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, ma_inclination);
-    mars.drawable.uniform.shading.specular = 0.0f;
-    mars.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/mars/8k_mars.png"));
-    planets.push_back(mars);
-
-    // Jupiter
-    planet jupiter;
-    jupiter = create_planet(j_radius, j_mass, j_p, j_v, j_inclination, j_force, j_orbitradius, j_vel_rot);
-    jupiter.drawable = mesh_primitive_sphere(j_radius*500, {0,0,0}, 40, 80);
-    jupiter.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, j_inclination);
-    jupiter.drawable.uniform.shading.specular = 0.0f;
-    jupiter.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/jupiter/8k_jupiter.png"));
-    planets.push_back(jupiter);
-
-    // Saturn
-    planet saturn;
-    saturn = create_planet(s_radius, s_mass, s_p, s_v, s_inclination, s_force, s_orbitradius, s_vel_rot);
-    saturn.drawable = mesh_primitive_sphere(s_radius*500, {0,0,0}, 40, 80);
-    saturn.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, s_inclination);
-    saturn.drawable.uniform.shading.specular = 0.0f;
-    saturn.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/saturn/8k_saturn.png"));
-    planets.push_back(saturn);
-
-    // Uranus
-    planet uranus;
-    uranus = create_planet(u_radius, u_mass, u_p, u_v, u_inclination, u_force, u_orbitradius, u_vel_rot);
-    uranus.drawable = mesh_primitive_sphere(u_radius*1000, {0,0,0}, 40, 80);
-    uranus.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, u_inclination);
-    uranus.drawable.uniform.shading.specular = 0.0f;
-    uranus.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/uranus/2k_uranus.png"));
-    planets.push_back(uranus);
-
-    // Neptune
-    planet neptune;
-    neptune = create_planet(n_radius, n_mass, n_p, n_v, n_inclination, n_force, n_orbitradius, n_vel_rot);
-    neptune.drawable = mesh_primitive_sphere(n_radius*1000, {0,0,0}, 40, 80);
-    neptune.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, n_inclination);
-    neptune.drawable.uniform.shading.specular = 0.0f;
-    neptune.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/neptune/2k_neptune.png"));
-    planets.push_back(neptune);
-    std::cout << saturn.force << std::endl;
-    // Saturn ring
-    saturn_ring = create_planet(s_radius, s_mass, s_p, s_v, s_inclination, s_force, s_orbitradius, s_vel_rot);
-    saturn_ring.drawable = create_ring(sr_int_radius*500, sr_ext_radius*500);
-    saturn_ring.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, s_inclination);
-   // saturn_ring.drawable.uniform.shading.specular = 0.0f;
-    saturn_ring.drawable.uniform.shading = {1,0,0};
-    // Load a texture (with transparent background)
-    saturn_ring.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/saturn/8k_saturn_ring_alpha.png"), GL_REPEAT, GL_REPEAT );
-
-    // Moon
-    moon = create_planet(mo_radius, mo_mass, mo_p, mo_v, mo_inclination, mo_force, mo_orbitradius, mo_vel_rot);
-    moon.drawable = mesh_primitive_sphere(mo_radius*1000, {0,0,0}, 40, 80);
-    moon.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, mo_inclination);
-    moon.drawable.uniform.shading.specular = 0.0f;
-    moon.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/moon/8k_moon.png"));
-
+    // Moon creation
+    setup_moon();
 }
 
 
@@ -271,6 +184,27 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     glBindTexture(GL_TEXTURE_2D, scene.texture_white);
     glDepthMask(true);
 
+    // Sun ring
+    // Enable use of alpha component as color blending for transparent elements
+    //  new color = previous color + (1-alpha) current color
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Disable depth buffer writing
+    //  - Transparent elements cannot use depth buffer
+    //  - They are supposed to be display from furest to nearest elements
+    glDepthMask(false);
+
+    glBindTexture(GL_TEXTURE_2D, sun_ring.texture_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // avoids sampling artifacts
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // avoids sampling artifacts
+
+    sun_ring.uniform.transform.rotation = scene.camera.orientation;
+    draw(sun_ring, scene.camera, shaders["mesh"]);
+
+    glBindTexture(GL_TEXTURE_2D, scene.texture_white);
+    glDepthMask(true);
+
     // Wireframe
     if( gui_scene.wireframe ){ // wireframe if asked from the GUI
         glPolygonOffset( 1.0, 1.0 );
@@ -286,6 +220,8 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
         draw(moon.drawable, scene.camera, shaders["wireframe"]);
         // Saturn ring
         draw(saturn_ring.drawable, scene.camera, shaders["wireframe"]);
+        // Sun ring
+        draw(sun_ring, scene.camera, shaders["wireframe"]);
     }
     // ************************* //
 }
@@ -293,72 +229,72 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
 
 
- void scene_model::mouse_click(scene_structure& scene, GLFWwindow* window, int , int , int )
- {
-     // Mouse click is used to select a position of the control polygon
-     // ******************************************************************** //
+// void scene_model::mouse_click(scene_structure& scene, GLFWwindow* window, int , int , int )
+// {
+//     // Mouse click is used to select a position of the control polygon
+//     // ******************************************************************** //
 
-     // Cursor coordinates
-     const vec2 cursor = glfw_cursor_coordinates_window(window);
+//     // Cursor coordinates
+//     const vec2 cursor = glfw_cursor_coordinates_window(window);
 
-     // Check that the mouse is clicked (drag and drop)
-     const bool mouse_click_left  = glfw_mouse_pressed_left(window);
-     const bool key_shift = glfw_key_shift_pressed(window);
+//     // Check that the mouse is clicked (drag and drop)
+//     const bool mouse_click_left  = glfw_mouse_pressed_left(window);
+//     const bool key_shift = glfw_key_shift_pressed(window);
 
-     // Check if shift key is pressed
-     if(mouse_click_left && key_shift)
-     {
-         // Create the 3D ray passing by the selected point on the screen
-         const ray r = picking_ray(scene.camera, cursor);
+//     // Check if shift key is pressed
+//     if(mouse_click_left && key_shift)
+//     {
+//         // Create the 3D ray passing by the selected point on the screen
+//         const ray r = picking_ray(scene.camera, cursor);
 
-         // Check if this ray intersects a position (represented by a sphere)
-         //  Loop over all positions and get the intersected position (the closest one in case of multiple intersection)
-         const size_t N = keyframes.size();
-         picked_object = -1;
-         float distance_min = 0.0f;
-         for(size_t k=0; k<N; ++k)
-         {
-             const vec3 c = keyframes[k].p;
-             const picking_info info = ray_intersect_sphere(r, c, 0.1f);
+//         // Check if this ray intersects a position (represented by a sphere)
+//         //  Loop over all positions and get the intersected position (the closest one in case of multiple intersection)
+//         const size_t N = keyframes.size();
+//         picked_object = -1;
+//         float distance_min = 0.0f;
+//         for(size_t k=0; k<N; ++k)
+//         {
+//             const vec3 c = keyframes[k].p;
+//             const picking_info info = ray_intersect_sphere(r, c, 0.1f);
 
-             if( info.picking_valid ) // the ray intersects a sphere
-             {
-                 const float distance = norm(info.intersection-r.p); // get the closest intersection
-                 if( picked_object==-1 || distance<distance_min ){
-                     distance_min = distance;
-                     picked_object = k;
-                 }
-             }
-         }
-     }
+//             if( info.picking_valid ) // the ray intersects a sphere
+//             {
+//                 const float distance = norm(info.intersection-r.p); // get the closest intersection
+//                 if( picked_object==-1 || distance<distance_min ){
+//                     distance_min = distance;
+//                     picked_object = k;
+//                 }
+//             }
+//         }
+//     }
 
- }
+// }
 
- void scene_model::mouse_move(scene_structure& scene, GLFWwindow* window)
- {
+// void scene_model::mouse_move(scene_structure& scene, GLFWwindow* window)
+// {
 
-     const bool mouse_click_left  = glfw_mouse_pressed_left(window);
-     const bool key_shift = glfw_key_shift_pressed(window);
-     if(mouse_click_left && key_shift && picked_object!=-1)
-     {
-         // Translate the selected object to the new pointed mouse position within the camera plane
-         // ************************************************************************************** //
+//     const bool mouse_click_left  = glfw_mouse_pressed_left(window);
+//     const bool key_shift = glfw_key_shift_pressed(window);
+//     if(mouse_click_left && key_shift && picked_object!=-1)
+//     {
+//         // Translate the selected object to the new pointed mouse position within the camera plane
+//         // ************************************************************************************** //
 
-         // Get vector orthogonal to camera orientation
-         const mat4 M = scene.camera.camera_matrix();
-         const vec3 n = {M(0,2),M(1,2),M(2,2)};
+//         // Get vector orthogonal to camera orientation
+//         const mat4 M = scene.camera.camera_matrix();
+//         const vec3 n = {M(0,2),M(1,2),M(2,2)};
 
-         // Compute intersection between current ray and the plane orthogonal to the view direction and passing by the selected object
-         const vec2 cursor = glfw_cursor_coordinates_window(window);
-         const ray r = picking_ray(scene.camera, cursor);
-         vec3& p0 = keyframes[picked_object].p;
-         const picking_info info = ray_intersect_plane(r,n,p0);
+//         // Compute intersection between current ray and the plane orthogonal to the view direction and passing by the selected object
+//         const vec2 cursor = glfw_cursor_coordinates_window(window);
+//         const ray r = picking_ray(scene.camera, cursor);
+//         vec3& p0 = keyframes[picked_object].p;
+//         const picking_info info = ray_intersect_plane(r,n,p0);
 
-         // translate the position
-         p0 = info.intersection;
+//         // translate the position
+//         p0 = info.intersection;
 
-     }
- }
+//     }
+// }
 
 star& create_star(float radius, float mass, vec3 p, vec3 v){
     static star new_star;
@@ -466,6 +402,136 @@ mesh create_ring(float r_int, float r_ext)
     return ring;
 }
 
+void scene_model::setup_universe()
+{
+    universe = create_universe(1100.0f);
+    universe.uniform.shading = {1,0,0};
+    universe.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/universe/8k_stars_milky.png"));
+}
+
+void scene_model::setup_sun()
+{
+    // Sun
+    sun = create_star(sun_radius, sun_mass, {0,0,0} , {0,0,0});
+    sun.drawable = mesh_primitive_sphere(sun_radius*200, {0,0,0}, 40, 80);
+    sun.drawable.uniform.shading = {1,0,0};
+    sun.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/sun/8k_sun.png"));
+    // Sun ring
+    mesh sunring;
+    float size = 325.0f;
+    sunring.position     = {{-sun_radius*size,-sun_radius*size,0}, {sun_radius*size,-sun_radius*size,0}, {sun_radius*size,sun_radius*size,0}, {-sun_radius*size,sun_radius*size,0}};
+    sunring.texture_uv   = {{0,1}, {1,1}, {1,0}, {0,0}};
+    sunring.connectivity = {{0,1,2}, {0,2,3}};
+    sun_ring = sunring;
+    sun_ring.uniform.shading = {1,0,0};
+    // Load a texture (with transparent background)
+    sun_ring.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/sun/sun_ring12.png"), GL_REPEAT, GL_REPEAT );
+}
+
+void scene_model::setup_mercury()
+{
+    planet mercury;
+    mercury = create_planet(m_radius, m_mass, m_p, m_v, m_inclination, m_force, m_orbitradius, m_vel_rot);
+    mercury.drawable = mesh_primitive_sphere(m_radius*1000, {0,0,0}, 40, 80);
+    mercury.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, m_inclination);
+    mercury.drawable.uniform.shading.specular = 0.0f;
+    mercury.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/mercury/8k_mercury.png"));
+    planets.push_back(mercury);
+}
+
+void scene_model::setup_venus()
+{
+    planet venus;
+    venus = create_planet(v_radius, v_mass,v_p, v_v, v_inclination, v_force, v_orbitradius, v_vel_rot);
+    venus.drawable = mesh_primitive_sphere(v_radius*1000, {0,0,0}, 40, 80);
+    venus.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, v_inclination);
+    venus.drawable.uniform.shading.specular = 0.0f;
+    venus.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/venus/4k_venus.png"));
+    planets.push_back(venus);
+}
+
+void scene_model::setup_earth()
+{
+    planet earth;
+    earth = create_planet(e_radius, e_mass, e_p, e_v, e_inclination, e_force, e_orbitradius, e_vel_rot);
+    earth.drawable = mesh_primitive_sphere(e_radius*1000, {0,0,0}, 40, 80);
+    earth.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, e_inclination);
+    earth.drawable.uniform.shading.specular = 0.0f;
+    earth.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/earth/8k_earth.png"));
+    planets.push_back(earth);
+}
+
+void scene_model::setup_mars()
+{
+    planet mars;
+    mars = create_planet(ma_radius, ma_mass, ma_p, ma_v, ma_inclination, ma_force, ma_orbitradius, ma_vel_rot);
+    mars.drawable = mesh_primitive_sphere(ma_radius*1000, {0,0,0}, 40, 80);
+    mars.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, ma_inclination);
+    mars.drawable.uniform.shading.specular = 0.0f;
+    mars.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/mars/8k_mars.png"));
+    planets.push_back(mars);
+}
+
+void scene_model::setup_jupiter()
+{
+    planet jupiter;
+    jupiter = create_planet(j_radius, j_mass, j_p, j_v, j_inclination, j_force, j_orbitradius, j_vel_rot);
+    jupiter.drawable = mesh_primitive_sphere(j_radius*500, {0,0,0}, 40, 80);
+    jupiter.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, j_inclination);
+    jupiter.drawable.uniform.shading.specular = 0.0f;
+    jupiter.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/jupiter/8k_jupiter.png"));
+    planets.push_back(jupiter);
+}
+
+void scene_model::setup_saturn()
+{
+    planet saturn;
+    saturn = create_planet(s_radius, s_mass, s_p, s_v, s_inclination, s_force, s_orbitradius, s_vel_rot);
+    saturn.drawable = mesh_primitive_sphere(s_radius*500, {0,0,0}, 40, 80);
+    saturn.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, s_inclination);
+    saturn.drawable.uniform.shading.specular = 0.0f;
+    saturn.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/saturn/8k_saturn.png"));
+    planets.push_back(saturn);
+    // Saturn ring
+    saturn_ring = create_planet(s_radius, s_mass, s_p, s_v, s_inclination, s_force, s_orbitradius, s_vel_rot);
+    saturn_ring.drawable = create_ring(sr_int_radius*500, sr_ext_radius*500);
+    saturn_ring.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, s_inclination);
+    saturn_ring.drawable.uniform.shading = {1,0,0};
+    // Load a texture (with transparent background)
+    saturn_ring.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/saturn/8k_saturn_ring_alpha.png"), GL_REPEAT, GL_REPEAT );
+}
+
+void scene_model::setup_uranus()
+{
+    planet uranus;
+    uranus = create_planet(u_radius, u_mass, u_p, u_v, u_inclination, u_force, u_orbitradius, u_vel_rot);
+    uranus.drawable = mesh_primitive_sphere(u_radius*1000, {0,0,0}, 40, 80);
+    uranus.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, u_inclination);
+    uranus.drawable.uniform.shading.specular = 0.0f;
+    uranus.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/uranus/2k_uranus.png"));
+    planets.push_back(uranus);
+}
+
+void scene_model::setup_neptune()
+{
+    planet neptune;
+    neptune = create_planet(n_radius, n_mass, n_p, n_v, n_inclination, n_force, n_orbitradius, n_vel_rot);
+    neptune.drawable = mesh_primitive_sphere(n_radius*1000, {0,0,0}, 40, 80);
+    neptune.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, n_inclination);
+    neptune.drawable.uniform.shading.specular = 0.0f;
+    neptune.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/neptune/2k_neptune.png"));
+    planets.push_back(neptune);
+}
+
+void scene_model::setup_moon()
+{
+    moon = create_planet(mo_radius, mo_mass, mo_p, mo_v, mo_inclination, mo_force, mo_orbitradius, mo_vel_rot);
+    moon.drawable = mesh_primitive_sphere(mo_radius*1000, {0,0,0}, 40, 80);
+    moon.drawable.uniform.transform.rotation = rotation_from_axis_angle_mat3({0,1,0}, mo_inclination);
+    moon.drawable.uniform.shading.specular = 0.0f;
+    moon.drawable.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/moon/8k_moon.png"));
+}
+
  void scene_model::set_gui(timer_basic& timer)
  {
 //     ImGui::SliderFloat("Time", &timer.t, timer.t_min, timer.t_max);
@@ -490,21 +556,7 @@ mesh create_ring(float r_int, float r_ext)
      ImGui::Checkbox("Surface", &gui_scene.surface);     ImGui::SameLine();
      ImGui::Checkbox("Skeleton", &gui_scene.skeleton);   ImGui::SameLine();
 
-     if( ImGui::Button("Print Keyframe") )
-     {
-         std::cout<<"keyframe_position={";
-         for(size_t k=0; k<keyframes.size(); ++k)
-         {
-             const vec3& p = keyframes[k].p;
-             std::cout<< "{"<<p.x<<"f,"<<p.y<<"f,"<<p.z<<"f}";
-             if(k<keyframes.size()-1)
-                 std::cout<<", ";
-         }
-         std::cout<<"}"<<std::endl;
-     }
-
  }
-
 
  static size_t index_at_value(float t, vcl::buffer<vec3t> const& v)
  {
@@ -519,21 +571,6 @@ mesh create_ring(float r_int, float r_ext)
      return k;
  }
 
- std::vector<vec3> trajectory(float a, float b)
- {
-     std::vector<vec3> trajectory;
-
-     // Number of points
-     size_t N = 100;
-     float u = 2*3.14f/float(N);
-     for(int i=0; i<N; i++){
-         float theta = i*u;
-         vec3 position = {a*std::cos(theta), b*std::sin(theta),0};
-         trajectory.push_back(position);
-     }
-
-     return trajectory;
- }
 
 
 

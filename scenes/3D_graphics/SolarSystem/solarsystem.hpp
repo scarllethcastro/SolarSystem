@@ -57,33 +57,60 @@ struct scene_model : scene_base
 
     void setup_data(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
     void frame_draw(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
-    void draw_mouvement_bodies(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
-    void setup_mouvement_data(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
 
     // Called every time the mouse is clicked
-    void mouse_click(scene_structure& scene, GLFWwindow* window, int button, int action, int mods);
+//    void mouse_click(scene_structure& scene, GLFWwindow* window, int button, int action, int mods);
     // Called every time the mouse is moved
-    void mouse_move(scene_structure& scene, GLFWwindow* window);
-
-
+//    void mouse_move(scene_structure& scene, GLFWwindow* window);
 
     void set_gui(vcl::timer_basic& timer);
 
+    // Setup functions
+    void setup_universe();
+    void setup_sun();
+    void setup_mercury();
+    void setup_venus();
+    void setup_earth();
+    void setup_mars();
+    void setup_jupiter();
+    void setup_saturn();
+    void setup_uranus();
+    void setup_neptune();
+    void setup_moon();
+
+    // Draw functions
+    void draw_universe(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
+    void draw_sun(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
+    void draw_mercury(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
+    void draw_venus(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
+    void draw_earth(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
+    void draw_mars(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
+    void draw_jupiter(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
+    void draw_saturn(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
+    void draw_uranus(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
+    void draw_neptune(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
+    void draw_moon(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
+
+    // Update data functions
+    void update_position_planets();
+    void update_position_moon();
+    void update_position_saturn_ring();
+
     // visual representation of a surface
     gui_scene_structure gui_scene;
-    GLuint texture_id;
-    int picked_object;
+//    GLuint texture_id;
+//    int picked_object;
     // Data (p_i,t_i)
-    vcl::buffer<vec3t> keyframes; // Given (position,time)
+//    vcl::buffer<vec3t> keyframes; // Given (position,time)
 
-    vcl::mesh_drawable point_visual;                       // moving point
-    vcl::mesh_drawable keyframe_visual;                    // keyframe samples
-    vcl::mesh_drawable keyframe_picked;
+ //   vcl::mesh_drawable point_visual;                       // moving point
+ //   vcl::mesh_drawable keyframe_visual;                    // keyframe samples
+ //   vcl::mesh_drawable keyframe_picked;
     // Store the index of a selected sphere
 
-    vcl::hierarchy_mesh_drawable hierarchy;
-    vcl::hierarchy_mesh_drawable_display_skeleton hierarchy_visual_debug;
-    vcl::mesh_drawable ground;
+//    vcl::hierarchy_mesh_drawable hierarchy;
+  //  vcl::hierarchy_mesh_drawable_display_skeleton hierarchy_visual_debug;
+    //vcl::mesh_drawable ground;
 
     vcl::timer_interval timer;    // Timer allowing to indicate periodic events
 
@@ -92,6 +119,7 @@ struct scene_model : scene_base
 
     // Sun
     star sun;
+    vcl::mesh_drawable sun_ring;
 
     // Planets
     std::vector<planet> planets;
@@ -106,8 +134,6 @@ struct scene_model : scene_base
     GLuint texture_universe_id;
     GLuint texture_sun_id;
 
-    // For debug, draw the trajectory that the planet should follow
-    std::vector<vcl::vec3> trajectory;
 };
 
 #endif
