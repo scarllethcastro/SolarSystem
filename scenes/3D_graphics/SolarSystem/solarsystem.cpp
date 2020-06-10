@@ -194,7 +194,7 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
     const mat3 Inclination = rotation_from_axis_angle_mat3({0,1,0}, moon.inclination);
     const mat3 Rotation = rotation_from_axis_angle_mat3({0,0,1}, moon.hour);
     moon.drawable.uniform.transform.rotation = Inclination * Rotation;
-    moon.drawable.uniform.transform.translation = mo_p;
+    moon.drawable.uniform.transform.translation = mo_p + back*normalize(mo_p);
  //   moon.force = G * sun.mass * moon.mass/(norm(p)*norm(p)) * -1.0f *normalize(p);
     moon.force = G * sun.mass * moon.mass/(norm(mo_p)*norm(mo_p)) * -1.0f *normalize(mo_p) + G * planets[2].mass * moon.mass/(norm(planets[2].p - mo_p)*norm(planets[2].p - mo_p)) * -1.0f *normalize(mo_p - planets[2].p);
     moon.hour += moon.vel_rot * dt;
