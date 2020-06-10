@@ -19,6 +19,8 @@ struct gui_scene_structure
     bool wireframe   = false;
     bool surface     = true;
     bool skeleton    = false;
+    bool stars[10] = {false, false, false, false, false, false, false, false, false, false};
+
 };
 
 struct star {
