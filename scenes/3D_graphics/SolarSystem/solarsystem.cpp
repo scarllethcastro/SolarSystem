@@ -297,72 +297,72 @@ void scene_model::frame_draw(std::map<std::string,GLuint>& shaders, scene_struct
 
 
 
- void scene_model::mouse_click(scene_structure& scene, GLFWwindow* window, int , int , int )
- {
-     // Mouse click is used to select a position of the control polygon
-     // ******************************************************************** //
+// void scene_model::mouse_click(scene_structure& scene, GLFWwindow* window, int , int , int )
+// {
+//     // Mouse click is used to select a position of the control polygon
+//     // ******************************************************************** //
 
-     // Cursor coordinates
-     const vec2 cursor = glfw_cursor_coordinates_window(window);
+//     // Cursor coordinates
+//     const vec2 cursor = glfw_cursor_coordinates_window(window);
 
-     // Check that the mouse is clicked (drag and drop)
-     const bool mouse_click_left  = glfw_mouse_pressed_left(window);
-     const bool key_shift = glfw_key_shift_pressed(window);
+//     // Check that the mouse is clicked (drag and drop)
+//     const bool mouse_click_left  = glfw_mouse_pressed_left(window);
+//     const bool key_shift = glfw_key_shift_pressed(window);
 
-     // Check if shift key is pressed
-     if(mouse_click_left && key_shift)
-     {
-         // Create the 3D ray passing by the selected point on the screen
-         const ray r = picking_ray(scene.camera, cursor);
+//     // Check if shift key is pressed
+//     if(mouse_click_left && key_shift)
+//     {
+//         // Create the 3D ray passing by the selected point on the screen
+//         const ray r = picking_ray(scene.camera, cursor);
 
-         // Check if this ray intersects a position (represented by a sphere)
-         //  Loop over all positions and get the intersected position (the closest one in case of multiple intersection)
-         const size_t N = keyframes.size();
-         picked_object = -1;
-         float distance_min = 0.0f;
-         for(size_t k=0; k<N; ++k)
-         {
-             const vec3 c = keyframes[k].p;
-             const picking_info info = ray_intersect_sphere(r, c, 0.1f);
+//         // Check if this ray intersects a position (represented by a sphere)
+//         //  Loop over all positions and get the intersected position (the closest one in case of multiple intersection)
+//         const size_t N = keyframes.size();
+//         picked_object = -1;
+//         float distance_min = 0.0f;
+//         for(size_t k=0; k<N; ++k)
+//         {
+//             const vec3 c = keyframes[k].p;
+//             const picking_info info = ray_intersect_sphere(r, c, 0.1f);
 
-             if( info.picking_valid ) // the ray intersects a sphere
-             {
-                 const float distance = norm(info.intersection-r.p); // get the closest intersection
-                 if( picked_object==-1 || distance<distance_min ){
-                     distance_min = distance;
-                     picked_object = k;
-                 }
-             }
-         }
-     }
+//             if( info.picking_valid ) // the ray intersects a sphere
+//             {
+//                 const float distance = norm(info.intersection-r.p); // get the closest intersection
+//                 if( picked_object==-1 || distance<distance_min ){
+//                     distance_min = distance;
+//                     picked_object = k;
+//                 }
+//             }
+//         }
+//     }
 
- }
+// }
 
- void scene_model::mouse_move(scene_structure& scene, GLFWwindow* window)
- {
+// void scene_model::mouse_move(scene_structure& scene, GLFWwindow* window)
+// {
 
-     const bool mouse_click_left  = glfw_mouse_pressed_left(window);
-     const bool key_shift = glfw_key_shift_pressed(window);
-     if(mouse_click_left && key_shift && picked_object!=-1)
-     {
-         // Translate the selected object to the new pointed mouse position within the camera plane
-         // ************************************************************************************** //
+//     const bool mouse_click_left  = glfw_mouse_pressed_left(window);
+//     const bool key_shift = glfw_key_shift_pressed(window);
+//     if(mouse_click_left && key_shift && picked_object!=-1)
+//     {
+//         // Translate the selected object to the new pointed mouse position within the camera plane
+//         // ************************************************************************************** //
 
-         // Get vector orthogonal to camera orientation
-         const mat4 M = scene.camera.camera_matrix();
-         const vec3 n = {M(0,2),M(1,2),M(2,2)};
+//         // Get vector orthogonal to camera orientation
+//         const mat4 M = scene.camera.camera_matrix();
+//         const vec3 n = {M(0,2),M(1,2),M(2,2)};
 
-         // Compute intersection between current ray and the plane orthogonal to the view direction and passing by the selected object
-         const vec2 cursor = glfw_cursor_coordinates_window(window);
-         const ray r = picking_ray(scene.camera, cursor);
-         vec3& p0 = keyframes[picked_object].p;
-         const picking_info info = ray_intersect_plane(r,n,p0);
+//         // Compute intersection between current ray and the plane orthogonal to the view direction and passing by the selected object
+//         const vec2 cursor = glfw_cursor_coordinates_window(window);
+//         const ray r = picking_ray(scene.camera, cursor);
+//         vec3& p0 = keyframes[picked_object].p;
+//         const picking_info info = ray_intersect_plane(r,n,p0);
 
-         // translate the position
-         p0 = info.intersection;
+//         // translate the position
+//         p0 = info.intersection;
 
-     }
- }
+//     }
+// }
 
 star& create_star(float radius, float mass, vec3 p, vec3 v){
     static star new_star;

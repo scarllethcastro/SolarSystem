@@ -57,13 +57,13 @@ struct scene_model : scene_base
 
     void setup_data(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
     void frame_draw(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
-    void draw_mouvement_bodies(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
-    void setup_mouvement_data(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
+   // void draw_mouvement_bodies(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
+    //void setup_mouvement_data(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
 
     // Called every time the mouse is clicked
-    void mouse_click(scene_structure& scene, GLFWwindow* window, int button, int action, int mods);
+   // void mouse_click(scene_structure& scene, GLFWwindow* window, int button, int action, int mods);
     // Called every time the mouse is moved
-    void mouse_move(scene_structure& scene, GLFWwindow* window);
+   // void mouse_move(scene_structure& scene, GLFWwindow* window);
 
 
 
@@ -71,19 +71,19 @@ struct scene_model : scene_base
 
     // visual representation of a surface
     gui_scene_structure gui_scene;
-    GLuint texture_id;
-    int picked_object;
+  //  GLuint texture_id;
+    //int picked_object;
     // Data (p_i,t_i)
-    vcl::buffer<vec3t> keyframes; // Given (position,time)
+    //vcl::buffer<vec3t> keyframes; // Given (position,time)
 
-    vcl::mesh_drawable point_visual;                       // moving point
-    vcl::mesh_drawable keyframe_visual;                    // keyframe samples
-    vcl::mesh_drawable keyframe_picked;
+    //vcl::mesh_drawable point_visual;                       // moving point
+   // vcl::mesh_drawable keyframe_visual;                    // keyframe samples
+   // vcl::mesh_drawable keyframe_picked;
     // Store the index of a selected sphere
 
-    vcl::hierarchy_mesh_drawable hierarchy;
-    vcl::hierarchy_mesh_drawable_display_skeleton hierarchy_visual_debug;
-    vcl::mesh_drawable ground;
+//    vcl::hierarchy_mesh_drawable hierarchy;
+//    vcl::hierarchy_mesh_drawable_display_skeleton hierarchy_visual_debug;
+//    vcl::mesh_drawable ground;
 
     vcl::timer_interval timer;    // Timer allowing to indicate periodic events
 
@@ -107,7 +107,7 @@ struct scene_model : scene_base
     GLuint texture_sun_id;
 
     // For debug, draw the trajectory that the planet should follow
-    std::vector<vcl::vec3> trajectory;
+    //std::vector<vcl::vec3> trajectory;
 };
 
 #endif
