@@ -5,8 +5,8 @@
 // Include common part for exercises
 #include "main/helper_scene/helper_scene.hpp"
 
-// Include exercises
-#include "scenes/scenes.hpp"
+// Include scene
+#include "scenes/3D_graphics/SolarSystem/solarsystem.hpp"
 
 
 
