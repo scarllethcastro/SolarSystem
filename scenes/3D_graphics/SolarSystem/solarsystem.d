@@ -1,6 +1,6 @@
-scenes/3D_graphics/01_modeling/modeling.o: \
- scenes/3D_graphics/01_modeling/modeling.cpp \
- scenes/3D_graphics/01_modeling/modeling.hpp main/scene_base/base.hpp \
+scenes/3D_graphics/SolarSystem/solarsystem.o: \
+ scenes/3D_graphics/SolarSystem/solarsystem.cpp \
+ scenes/3D_graphics/SolarSystem/solarsystem.hpp main/scene_base/base.hpp \
  vcl/vcl.hpp vcl/base/base.hpp vcl/base/basic_types/basic_types.hpp \
  vcl/base/stl/stl.hpp vcl/base/types/types.hpp vcl/base/string/string.hpp \
  vcl/base/file/file.hpp vcl/base/rand/rand.hpp vcl/base/error/error.hpp \
@@ -67,7 +67,7 @@ scenes/3D_graphics/01_modeling/modeling.o: \
  third_party/simplexnoise/simplexnoise1234.hpp scenes/current_scene.hpp \
  main/helper_scene/helper_scene.hpp
 
-scenes/3D_graphics/01_modeling/modeling.hpp:
+scenes/3D_graphics/SolarSystem/solarsystem.hpp:
 
 main/scene_base/base.hpp:
 

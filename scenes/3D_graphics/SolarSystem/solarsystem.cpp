@@ -260,7 +260,7 @@ void scene_model::setup_sun()
     sun_ring = sunring;
     sun_ring.uniform.shading = {1,0,0};
     // Load a texture (with transparent background)
-    sun_ring.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/sun/sun_ring12.png"), GL_REPEAT, GL_REPEAT );
+    sun_ring.texture_id = create_texture_gpu( image_load_png("scenes/3D_graphics/SolarSystem/assets/sun/sun_ring.png"), GL_REPEAT, GL_REPEAT );
 }
 
 void scene_model::setup_mercury()
