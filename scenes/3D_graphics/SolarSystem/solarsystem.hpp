@@ -3,7 +3,7 @@
 #include "main/scene_base/base.hpp"
 
 
-#ifdef SCENE_SOLAR_SYSTEM
+//#ifdef SCENE_SOLAR_SYSTEM
 
 // Store a vec3 (p) + time (t)
 struct vec3t{
@@ -64,6 +64,7 @@ struct scene_model : scene_base
 //    void mouse_move(scene_structure& scene, GLFWwindow* window);
 
     void set_gui(vcl::timer_basic& timer);
+    void camera_position_at_each_star(scene_structure& scene);
 
     // Setup functions
     void setup_universe();
@@ -79,21 +80,16 @@ struct scene_model : scene_base
     void setup_moon();
 
     // Draw functions
-    void draw_universe(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
-    void draw_sun(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
-    void draw_mercury(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
-    void draw_venus(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
-    void draw_earth(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
-    void draw_mars(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
-    void draw_jupiter(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
-    void draw_saturn(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
-    void draw_uranus(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
-    void draw_neptune(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
-    void draw_moon(std::map<std::string,GLuint>& shaders, scene_structure& scene, gui_structure& gui);
+    void draw_universe(std::map<std::string,GLuint>& shaders, scene_structure& scene);
+    void draw_sun(std::map<std::string,GLuint>& shaders, scene_structure& scene);
+    void draw_planets(std::map<std::string,GLuint>& shaders, scene_structure& scene);
+    void draw_moon(std::map<std::string,GLuint>& shaders, scene_structure& scene);
+    void draw_saturn_ring(std::map<std::string,GLuint>& shaders, scene_structure& scene);
+    void draw_sun_ring(std::map<std::string,GLuint>& shaders, scene_structure& scene);
 
     // Update data functions
-    void update_position_planets();
-    void update_position_moon();
+    void update_position_planets(float dt);
+    void update_position_moon(float dt);
     void update_position_saturn_ring();
 
     // visual representation of a surface
@@ -136,6 +132,6 @@ struct scene_model : scene_base
 
 };
 
-#endif
+//#endif
 
 

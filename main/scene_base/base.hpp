@@ -2,7 +2,6 @@
 
 
 #include "vcl/vcl.hpp"
-#include "scenes/current_scene.hpp"
 #include "main/helper_scene/helper_scene.hpp"
 
 
