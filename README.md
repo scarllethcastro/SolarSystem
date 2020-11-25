@@ -6,7 +6,7 @@
 <p align="center">
   <h3 align="center">Solar System 3D Modelization</h3>
   <p align="center">
-    An animation using 
+    An animation by simulation
   </p>
 </p>
 
@@ -40,8 +40,9 @@
 ## About The Project
 
 This project aims to practice some VCL techniquess and C++ programming for 3D Modelisaiton. The base project is offered by __École Polytechnique de Paris__. This is an evaluated __personal project__ with __educational purposes__.
-The base work is provide by École Polytechnique, and the _solarsystem_ scene is the main goal for this project. 
-See [https://github.com/scarllethcastro/SolarSystem/tree/master/scenes/3D_graphics/SolarSystem]{https://github.com/scarllethcastro/SolarSystem/tree/master/scenes/3D_graphics/SolarSystem}
+The base work is provide by École Polytechnique, and the _solarsystem_ scene is the main target for this project. 
+See: [Solar system scenes](https://github.com/scarllethcastro/SolarSystem/tree/master/scenes/3D_graphics/SolarSystem)
+
 
 ### Built With
 To make this project, we used some API's such as:
