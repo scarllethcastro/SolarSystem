@@ -53,7 +53,7 @@ To make this project, we used some API's such as:
 
 
 ### Prerequisites
-_TODO: include the tables of the database_ 
+_TODO: include prerequisites_ 
 
 
 <!-- USAGE EXAMPLES -->
@@ -61,6 +61,8 @@ _TODO: include the tables of the database_
 The scene is an animation by simulation. The simulation used is the Classical Gravity. The sun is considered fix and the size of the planets are unscaled: planets ratio are 1000 times bigger than their normal sizes (considering their distances), in order to produce a good looking model. The sun, though, is also augmented, but a little less, so the proportion between planets and sun's ratio are also not real.
 
 The orbits, in the other hand, are scaled and respect the proportions, since it is an result of the dynamic system.
+
+_TODO: include small video_
 
 Preview:
 
